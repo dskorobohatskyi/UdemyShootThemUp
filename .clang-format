@@ -1,0 +1,14 @@
+Language: Cpp
+BasedOnStyle: Microsoft
+
+IndentWidth: 4
+UseTab: Never
+SortIncludes: false
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+BreakBeforeBraces: Allman
+
+PointerAlignment: Left
+ReferenceAlignment: Left
+QualifierAlignment: Custom
+QualifierOrder: ['inline', 'static', 'const', 'type']
