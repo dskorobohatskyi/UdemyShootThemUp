@@ -31,4 +31,8 @@ public:
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
+
+private:
+    void MoveForward(float AxisValue);
+    void MoveRight(float AxisValue);
 };
