@@ -48,6 +48,6 @@ private:
     void OnRunningEnd();
 
 private:
-    bool IsRunningRequested = false;
-    bool IsMovingForward = false;
+    bool bIsRunningRequested = false;
+    bool bIsMovingForward = false;
 };

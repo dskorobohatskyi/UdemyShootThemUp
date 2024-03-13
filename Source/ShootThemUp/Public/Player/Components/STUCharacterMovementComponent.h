@@ -7,13 +7,13 @@
 #include "STUCharacterMovementComponent.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class SHOOTTHEMUP_API USTUCharacterMovementComponent : public UCharacterMovementComponent
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
 public:
     virtual float GetMaxSpeed() const override;
 

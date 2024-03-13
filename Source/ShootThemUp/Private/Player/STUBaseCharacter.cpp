@@ -7,7 +7,7 @@
 #include "Player/Components/STUCharacterMovementComponent.h"
 
 // Sets default values
-ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer) 
+ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer.SetDefaultSubobjectClass<USTUCharacterMovementComponent>(CharacterMovementComponentName))
 {
     // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need
@@ -46,17 +46,16 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASTUBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnRunningStart);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnRunningEnd);
-
 }
 
 bool ASTUBaseCharacter::IsRunning() const
 {
-    return IsRunningRequested && IsMovingForward && !GetVelocity().IsNearlyZero();
+    return bIsRunningRequested && bIsMovingForward && !GetVelocity().IsNearlyZero();
 }
 
 void ASTUBaseCharacter::MoveForward(float AxisValue)
 {
-    IsMovingForward = AxisValue > 0.0f;
+    bIsMovingForward = AxisValue > 0.0f;
     AddMovementInput(GetActorForwardVector(), AxisValue);
 }
 
@@ -67,10 +66,10 @@ void ASTUBaseCharacter::MoveRight(float AxisValue)
 
 void ASTUBaseCharacter::OnRunningStart()
 {
-    IsRunningRequested = true;
+    bIsRunningRequested = true;
 }
 
 void ASTUBaseCharacter::OnRunningEnd()
 {
-    IsRunningRequested = false;
+    bIsRunningRequested = false;
 }
