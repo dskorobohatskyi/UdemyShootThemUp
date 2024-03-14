@@ -53,14 +53,43 @@ bool ASTUBaseCharacter::IsRunning() const
     return bIsRunningRequested && bIsMovingForward && !GetVelocity().IsNearlyZero();
 }
 
+float ASTUBaseCharacter::GetMovementDirection() const
+{
+    const FVector VelocityNormalVector = GetVelocity().GetSafeNormal();
+    if (VelocityNormalVector.IsZero())
+    {
+        return 0.0f;
+    }
+
+    const FVector ForwardNormalVector = GetActorForwardVector();
+
+    const float DotProductValue = FVector::DotProduct(ForwardNormalVector, VelocityNormalVector);
+    const FVector CrossProductVector = FVector::CrossProduct(ForwardNormalVector, VelocityNormalVector);
+
+    const float SideCorrectness = FMath::Sign(CrossProductVector.Z);
+    const float DegreeBetweenVectors = FMath::RadiansToDegrees(FMath::Acos(DotProductValue) * SideCorrectness);
+
+    return DegreeBetweenVectors;
+}
+
 void ASTUBaseCharacter::MoveForward(float AxisValue)
 {
     bIsMovingForward = AxisValue > 0.0f;
+
+    if (FMath::IsNearlyZero(AxisValue))
+    {
+        return;
+    }
+
     AddMovementInput(GetActorForwardVector(), AxisValue);
 }
 
 void ASTUBaseCharacter::MoveRight(float AxisValue)
 {
+    if (FMath::IsNearlyZero(AxisValue))
+    {
+        return;
+    }
     AddMovementInput(GetActorRightVector(), AxisValue);
 }
 
