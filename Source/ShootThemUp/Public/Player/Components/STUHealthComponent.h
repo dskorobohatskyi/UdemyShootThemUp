@@ -20,10 +20,15 @@ public:
 protected:
     // Called when the game starts
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = 0.f, ClampMax = 1000.f))
     float MaxHealth = 100.f;
 
 private:
     float Health = 0.f;
+
+    UFUNCTION()
+    void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
+                         class AController* InstigatedBy, AActor* DamageCauser);
 };
