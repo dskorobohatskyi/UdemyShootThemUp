@@ -1,6 +1,10 @@
 // Shoot Them Up Game. All Rights Reserved
 
 #include "Player/Components/STUHealthComponent.h"
+#include "Dev/STUFireDamageType.h"
+#include "Dev/STUIceDamageType.h"
+
+DEFINE_LOG_CATEGORY_STATIC(STUHealthComponentLog, Display, All);
 
 USTUHealthComponent::USTUHealthComponent()
 {
@@ -38,5 +42,16 @@ void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, co
                                           AController* InstigatedBy, AActor* DamageCauser)
 {
     Health -= Damage;
-    // TODO add logs
+
+    if (DamageType)
+    {
+        if (DamageType->IsA<USTUFireDamageType>())
+        {
+            UE_LOG(STUHealthComponentLog, Display, TEXT("The player has been damaged by fire"));
+        }
+        else if (DamageType->IsA<USTUIceDamageType>())
+        {
+            UE_LOG(STUHealthComponentLog, Display, TEXT("The player has been damaged by ice"));
+        }
+    }
 }

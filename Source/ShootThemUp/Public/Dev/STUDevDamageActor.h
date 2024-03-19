@@ -11,32 +11,35 @@ class USceneComponent;
 UCLASS()
 class SHOOTTHEMUP_API ASTUDevDamageActor : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	ASTUDevDamageActor();
+    GENERATED_BODY()
+
+public:
+    // Sets default values for this actor's properties
+    ASTUDevDamageActor();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    // Called when the game starts or when spawned
+    virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     USceneComponent* SceneComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float Radius = 300.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FColor SphereColor = FColor::White;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float Damage = 10.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bDoFullDamage = true;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<UDamageType> DamageType;
+
+public:
+    // Called every frame
+    virtual void Tick(float DeltaTime) override;
 };
