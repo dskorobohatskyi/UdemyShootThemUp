@@ -1,8 +1,6 @@
 // Shoot Them Up Game. All Rights Reserved
 
 #include "Player/Components/STUHealthComponent.h"
-#include "Dev/STUFireDamageType.h"
-#include "Dev/STUIceDamageType.h"
 
 DEFINE_LOG_CATEGORY_STATIC(STUHealthComponentLog, Display, All);
 
@@ -11,12 +9,18 @@ USTUHealthComponent::USTUHealthComponent()
     PrimaryComponentTick.bCanEverTick = false;
 }
 
+bool USTUHealthComponent::IsDead() const
+{
+    return FMath::IsNearlyZero(GetHealth()) || FMath::IsNegativeOrNegativeZero(GetHealth());
+}
+
 // Called when the game starts
 void USTUHealthComponent::BeginPlay()
 {
     Super::BeginPlay();
 
     Health = MaxHealth;
+    OnHealthChanged.Broadcast(Health);
 
     AActor* ComponentOwner = GetOwner();
 
@@ -41,17 +45,22 @@ void USTUHealthComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
                                           AController* InstigatedBy, AActor* DamageCauser)
 {
-    Health -= Damage;
-
-    if (DamageType)
+    if (Damage < 0.f)
     {
-        if (DamageType->IsA<USTUFireDamageType>())
-        {
-            UE_LOG(STUHealthComponentLog, Display, TEXT("The player has been damaged by fire"));
-        }
-        else if (DamageType->IsA<USTUIceDamageType>())
-        {
-            UE_LOG(STUHealthComponentLog, Display, TEXT("The player has been damaged by ice"));
-        }
+        UE_LOG(STUHealthComponentLog, Warning, TEXT("OnTakeAnyDamage received negative damage value!"));
+        return;
+    }
+
+    if (IsDead())
+    {
+        return;
+    }
+
+    Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+    OnHealthChanged.Broadcast(Health);
+
+    if (FMath::IsNearlyZero(Health))
+    {
+        OnDeath.Broadcast();
     }
 }

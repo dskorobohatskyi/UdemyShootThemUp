@@ -4,10 +4,13 @@
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 #include "Player/Components/STUCharacterMovementComponent.h"
 #include "Player/Components/STUHealthComponent.h"
+
+DEFINE_LOG_CATEGORY_STATIC(ASTUBaseCharacterLog, Display, All);
 
 // Sets default values
 ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer)
@@ -35,14 +38,22 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer
 void ASTUBaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    check(HealthComponent);
+    check(HealthTextComponent);
+    check(GetCharacterMovement());
+
+    HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnCharacterDeath);
+    HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
+
+    // Initial value setting since Actor components BeginPlay() are called at first, and then Actor itself
+    OnHealthChanged(HealthComponent->GetHealth());
 }
 
 // Called every frame
 void ASTUBaseCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
-    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%0.f"), HealthComponent->GetHealth())));
 }
 
 // Called to bind functionality to input
@@ -112,4 +123,24 @@ void ASTUBaseCharacter::OnRunningStart()
 void ASTUBaseCharacter::OnRunningEnd()
 {
     bIsRunningRequested = false;
+}
+
+void ASTUBaseCharacter::OnCharacterDeath()
+{
+    UE_LOG(ASTUBaseCharacterLog, Display, TEXT("Player died!"));
+
+    GetCharacterMovement()->DisableMovement();
+
+    if (DeathAnimMontage)
+    {
+        PlayAnimMontage(DeathAnimMontage);
+    }
+
+    const float LifeSpan = 5.f;
+    SetLifeSpan(LifeSpan);
+}
+
+void ASTUBaseCharacter::OnHealthChanged(float NewHealth) 
+{
+    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%0.f"), NewHealth)));
 }
