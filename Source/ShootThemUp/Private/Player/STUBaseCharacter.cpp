@@ -6,6 +6,7 @@
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/Controller.h"
 
 #include "Player/Components/STUCharacterMovementComponent.h"
 #include "Player/Components/STUHealthComponent.h"
@@ -138,6 +139,11 @@ void ASTUBaseCharacter::OnCharacterDeath()
 
     const float LifeSpan = 5.f;
     SetLifeSpan(LifeSpan);
+
+    if (Controller)
+    {
+        Controller->ChangeState(NAME_Spectating);
+    }
 }
 
 void ASTUBaseCharacter::OnHealthChanged(float NewHealth) 
