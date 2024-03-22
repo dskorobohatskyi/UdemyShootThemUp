@@ -55,10 +55,13 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
     UAnimMontage* DeathAnimMontage;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
+    float LifeSpanOnDeath = 5.f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
     FVector2f LandedDamageVelocityRange = FVector2f(800.f, 2000.f);
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
     FVector2f LandedDamageRange = FVector2f(25.f, 300.f);
 
 private:

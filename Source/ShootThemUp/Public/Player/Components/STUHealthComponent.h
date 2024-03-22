@@ -6,8 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "STUHealthComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnDeath); // C++ only delegate, no exposing to BPs
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float);
+DECLARE_MULTICAST_DELEGATE(FOnDeathDelegate); // C++ only delegate, no exposing to BPs
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChangedDelegate, float);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUHealthComponent : public UActorComponent
@@ -18,13 +18,13 @@ public:
     // Sets default values for this component's properties
     USTUHealthComponent();
 
+    FOnDeathDelegate OnDeath;
+    FOnHealthChangedDelegate OnHealthChanged;
+
     float GetHealth() const { return Health; }
 
     UFUNCTION(BlueprintCallable, Category = "Health")
     bool IsDead() const;
-
-    FOnDeath OnDeath;
-    FOnHealthChanged OnHealthChanged;
 
     UFUNCTION(BlueprintCallable, Category = "Health")
     void Heal(float HPIncrease);

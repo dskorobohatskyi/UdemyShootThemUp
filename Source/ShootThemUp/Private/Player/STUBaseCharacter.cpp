@@ -139,8 +139,7 @@ void ASTUBaseCharacter::OnCharacterDeath()
         PlayAnimMontage(DeathAnimMontage);
     }
 
-    const float LifeSpan = 5.f;
-    SetLifeSpan(LifeSpan);
+    SetLifeSpan(LifeSpanOnDeath);
 
     if (Controller)
     {
