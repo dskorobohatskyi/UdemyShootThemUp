@@ -1,6 +1,8 @@
 // Shoot Them Up Game. All Rights Reserved
 
 #include "Player/Components/STUHealthComponent.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
 
 DEFINE_LOG_CATEGORY_STATIC(STUHealthComponentLog, Display, All);
 
@@ -19,8 +21,7 @@ void USTUHealthComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    Health = MaxHealth;
-    OnHealthChanged.Broadcast(Health);
+    UpdateHealthSafe(MaxHealth);
 
     AActor* ComponentOwner = GetOwner();
 
@@ -56,8 +57,7 @@ void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, co
         return;
     }
 
-    Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
-    OnHealthChanged.Broadcast(Health);
+    UpdateHealthSafe(Health - Damage);
 
     check(GetHealth() < MaxHealth);
 
@@ -91,17 +91,18 @@ void USTUHealthComponent::TryToHeal()
     Heal(HealingPoints);
 }
 
-void USTUHealthComponent::Heal(float HP)
+void USTUHealthComponent::Heal(float HPIncrease)
 {
-    Health = FMath::Clamp(Health + HP, 0.0f, MaxHealth);
-
-    OnHealthChanged.Broadcast(Health);
+    UpdateHealthSafe(Health + HPIncrease);
 }
 
 void USTUHealthComponent::StartAutoHealTimer()
 {
-    GetWorld()->GetTimerManager().SetTimer(AutoHealTimerHandle, this, &USTUHealthComponent::TryToHeal,
-                                           HealIntervalInSec, true, HealDelayInSec);
+    if (auto* World = GetWorld())
+    {
+        World->GetTimerManager().SetTimer(AutoHealTimerHandle, this, &USTUHealthComponent::TryToHeal, HealIntervalInSec,
+                                          true, HealDelayInSec);
+    }
 }
 
 void USTUHealthComponent::StopAutoHealTimer()
@@ -111,4 +112,10 @@ void USTUHealthComponent::StopAutoHealTimer()
         GetWorld()->GetTimerManager().ClearTimer(AutoHealTimerHandle);
         AutoHealTimerHandle.Invalidate();
     }
+}
+
+void USTUHealthComponent::UpdateHealthSafe(float NewHealth)
+{
+    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    OnHealthChanged.Broadcast(Health);
 }

@@ -27,7 +27,7 @@ public:
     FOnHealthChanged OnHealthChanged;
 
     UFUNCTION(BlueprintCallable, Category = "Health")
-    void Heal(float HP);
+    void Heal(float HPIncrease);
 
 protected:
     // Called when the game starts
@@ -38,16 +38,19 @@ protected:
     float MaxHealth = 100.f;
 
     // In the future can be switchable in runtime also
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal")
     bool bIsAutoHealEnabled = false;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = 0.f, ClampMax = 60.f))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal",
+              meta = (ClampMin = 0.f, ClampMax = 60.f, EditCondition = "bIsAutoHealEnabled"))
     float HealDelayInSec = 0.0f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = 0.f, ClampMax = 60.f))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal",
+              meta = (ClampMin = 0.f, ClampMax = 60.f, EditCondition = "bIsAutoHealEnabled"))
     float HealIntervalInSec = 0.5f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = 0.f, ClampMax = 500.f))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal",
+              meta = (ClampMin = 0.f, ClampMax = 500.f, EditCondition = "bIsAutoHealEnabled"))
     float HealingPoints = 1.f;
 
 private:
@@ -61,4 +64,6 @@ private:
     void TryToHeal();
     void StartAutoHealTimer();
     void StopAutoHealTimer();
+
+    void UpdateHealthSafe(float NewHealth);
 };
