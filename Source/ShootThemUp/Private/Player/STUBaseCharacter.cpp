@@ -49,6 +49,8 @@ void ASTUBaseCharacter::BeginPlay()
 
     // Initial value setting since Actor components BeginPlay() are called at first, and then Actor itself
     OnHealthChanged(HealthComponent->GetHealth());
+
+    LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
 }
 
 // Called every frame
@@ -146,7 +148,28 @@ void ASTUBaseCharacter::OnCharacterDeath()
     }
 }
 
-void ASTUBaseCharacter::OnHealthChanged(float NewHealth) 
+void ASTUBaseCharacter::OnHealthChanged(float NewHealth)
 {
     HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%0.f"), NewHealth)));
+}
+
+void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
+{
+    const float LandedVelocity = -GetVelocity().Z;
+    UE_LOG(ASTUBaseCharacterLog, Verbose, TEXT("Landed velocity for character [%s] after falling = %.2f"), *GetName(),
+           LandedVelocity)
+
+    // player doesn't reach minimal height to be damaged from falling
+    if (LandedVelocity < LandedDamageVelocityRange.X)
+    {
+        return;
+    }
+
+    const float InterpolatedDamage =
+        FMath::GetMappedRangeValueClamped(LandedDamageVelocityRange, LandedDamageRange, LandedVelocity);
+
+    UE_LOG(ASTUBaseCharacterLog, Verbose, TEXT("Received damage from falling for character [%s] = %.2f"), *GetName(),
+           InterpolatedDamage)
+
+    TakeDamage(InterpolatedDamage, FDamageEvent{}, nullptr, nullptr);
 }
