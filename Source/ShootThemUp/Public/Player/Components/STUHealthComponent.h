@@ -20,11 +20,14 @@ public:
 
     float GetHealth() const { return Health; }
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "Health")
     bool IsDead() const;
 
     FOnDeath OnDeath;
     FOnHealthChanged OnHealthChanged;
+
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    void Heal(float HP);
 
 protected:
     // Called when the game starts
@@ -34,10 +37,28 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = 0.f, ClampMax = 1000.f))
     float MaxHealth = 100.f;
 
+    // In the future can be switchable in runtime also
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
+    bool bIsAutoHealEnabled = false;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = 0.f, ClampMax = 60.f))
+    float HealDelayInSec = 0.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = 0.f, ClampMax = 60.f))
+    float HealIntervalInSec = 0.5f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = 0.f, ClampMax = 500.f))
+    float HealingPoints = 1.f;
+
 private:
     float Health = 0.f;
+    FTimerHandle AutoHealTimerHandle;
 
     UFUNCTION()
     void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
                          class AController* InstigatedBy, AActor* DamageCauser);
+
+    void TryToHeal();
+    void StartAutoHealTimer();
+    void StopAutoHealTimer();
 };

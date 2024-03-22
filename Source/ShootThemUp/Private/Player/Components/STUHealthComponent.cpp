@@ -59,8 +59,56 @@ void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, co
     Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
     OnHealthChanged.Broadcast(Health);
 
-    if (FMath::IsNearlyZero(Health))
+    check(GetHealth() < MaxHealth);
+
+    if (bIsAutoHealEnabled)
+    {
+        StopAutoHealTimer();
+    }
+
+    if (IsDead())
     {
         OnDeath.Broadcast();
+    }
+    else
+    {
+        if (bIsAutoHealEnabled)
+        {
+            StartAutoHealTimer();
+        }
+    }
+}
+
+void USTUHealthComponent::TryToHeal()
+{
+    if (FMath::IsNearlyEqual(GetHealth(), MaxHealth))
+    {
+        // No need to heal here
+        StopAutoHealTimer();
+        return;
+    }
+
+    Heal(HealingPoints);
+}
+
+void USTUHealthComponent::Heal(float HP)
+{
+    Health = FMath::Clamp(Health + HP, 0.0f, MaxHealth);
+
+    OnHealthChanged.Broadcast(Health);
+}
+
+void USTUHealthComponent::StartAutoHealTimer()
+{
+    GetWorld()->GetTimerManager().SetTimer(AutoHealTimerHandle, this, &USTUHealthComponent::TryToHeal,
+                                           HealIntervalInSec, true, HealDelayInSec);
+}
+
+void USTUHealthComponent::StopAutoHealTimer()
+{
+    if (AutoHealTimerHandle.IsValid())
+    {
+        GetWorld()->GetTimerManager().ClearTimer(AutoHealTimerHandle);
+        AutoHealTimerHandle.Invalidate();
     }
 }
