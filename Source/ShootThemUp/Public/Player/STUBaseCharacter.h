@@ -11,6 +11,7 @@ class USpringArmComponent;
 class USTUHealthComponent;
 class UTextRenderComponent;
 class UAnimMontage;
+class ASTUBaseWeapon;
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
@@ -64,6 +65,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Damage")
     FVector2f LandedDamageRange = FVector2f(25.f, 300.f);
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    TSubclassOf<ASTUBaseWeapon> WeaponClass;
+
 private:
     void MoveForward(float AxisValue);
     void MoveRight(float AxisValue);
@@ -76,6 +80,8 @@ private:
 
     UFUNCTION()
     void OnGroundLanded(const FHitResult& Hit);
+
+    void SpawnWeapon();
 
 private:
     bool bIsRunningRequested = false;

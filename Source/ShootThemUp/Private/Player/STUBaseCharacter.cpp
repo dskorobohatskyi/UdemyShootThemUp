@@ -10,6 +10,7 @@
 
 #include "Player/Components/STUCharacterMovementComponent.h"
 #include "Player/Components/STUHealthComponent.h"
+#include "Weapon/STUBaseWeapon.h"
 
 DEFINE_LOG_CATEGORY_STATIC(ASTUBaseCharacterLog, Display, All);
 
@@ -51,6 +52,8 @@ void ASTUBaseCharacter::BeginPlay()
     OnHealthChanged(HealthComponent->GetHealth());
 
     LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
+
+    SpawnWeapon();
 }
 
 // Called every frame
@@ -171,4 +174,24 @@ void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
            InterpolatedDamage)
 
     TakeDamage(InterpolatedDamage, FDamageEvent{}, nullptr, nullptr);
+}
+
+void ASTUBaseCharacter::SpawnWeapon()
+{
+    if (GetWorld() == nullptr)
+    {
+        return;
+    }
+
+    check(WeaponClass.Get() != nullptr);
+
+    // FActorSpawnParameters ActorSpawnParameters;
+    // ActorSpawnParameters.Owner = this;
+    ASTUBaseWeapon* Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(WeaponClass /*, ActorSpawnParameters*/);
+
+    if (Weapon)
+    {
+        const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, false);
+        Weapon->AttachToComponent(GetMesh(), TransformRules, "WeaponPoint");
+    }
 }
