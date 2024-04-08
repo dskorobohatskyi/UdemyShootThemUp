@@ -23,8 +23,9 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer
     PrimaryActorTick.bCanEverTick = true;
 
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
-    SpringArmComponent->SetupAttachment(GetRootComponent());
     SpringArmComponent->bUsePawnControlRotation = true;
+    SpringArmComponent->SocketOffset = FVector(0.f, 100.f, 80.f);
+    SpringArmComponent->SetupAttachment(GetRootComponent());
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArmComponent);
@@ -33,6 +34,7 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer
     HealthComponent = CreateDefaultSubobject<USTUHealthComponent>("HealthComponent");
 
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("TextRenderComponent");
+    HealthTextComponent->SetOwnerNoSee(true);
     HealthTextComponent->SetupAttachment(GetRootComponent());
 }
 
