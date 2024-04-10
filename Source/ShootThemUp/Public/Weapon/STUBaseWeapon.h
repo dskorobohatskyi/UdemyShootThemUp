@@ -17,6 +17,8 @@ public:
     // Sets default values for this actor's properties
     ASTUBaseWeapon();
 
+    virtual void Fire();
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* SkeletalMesh;

@@ -10,9 +10,10 @@
 
 #include "Player/Components/STUCharacterMovementComponent.h"
 #include "Player/Components/STUHealthComponent.h"
-#include "Weapon/STUBaseWeapon.h"
+#include "Player/Components/STUWeaponComponent.h"
 
-DEFINE_LOG_CATEGORY_STATIC(ASTUBaseCharacterLog, Display, All);
+
+DEFINE_LOG_CATEGORY_STATIC(STUBaseCharacterLog, Display, All);
 
 // Sets default values
 ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer)
@@ -36,6 +37,8 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("TextRenderComponent");
     HealthTextComponent->SetOwnerNoSee(true);
     HealthTextComponent->SetupAttachment(GetRootComponent());
+
+    WeaponComponent = CreateDefaultSubobject<USTUWeaponComponent>("WeaponComponent");
 }
 
 // Called when the game starts or when spawned
@@ -46,6 +49,7 @@ void ASTUBaseCharacter::BeginPlay()
     check(HealthComponent);
     check(HealthTextComponent);
     check(GetCharacterMovement());
+    check(WeaponComponent);
 
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnCharacterDeath);
     HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
@@ -54,8 +58,6 @@ void ASTUBaseCharacter::BeginPlay()
     OnHealthChanged(HealthComponent->GetHealth());
 
     LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
-
-    SpawnWeapon();
 }
 
 // Called every frame
@@ -76,6 +78,7 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASTUBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnRunningStart);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnRunningEnd);
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::Fire);
 }
 
 bool ASTUBaseCharacter::IsRunning() const
@@ -135,7 +138,7 @@ void ASTUBaseCharacter::OnRunningEnd()
 
 void ASTUBaseCharacter::OnCharacterDeath()
 {
-    UE_LOG(ASTUBaseCharacterLog, Display, TEXT("Player died!"));
+    UE_LOG(STUBaseCharacterLog, Display, TEXT("Player died!"));
 
     GetCharacterMovement()->DisableMovement();
 
@@ -160,7 +163,7 @@ void ASTUBaseCharacter::OnHealthChanged(float NewHealth)
 void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 {
     const float LandedVelocity = -GetVelocity().Z;
-    UE_LOG(ASTUBaseCharacterLog, Verbose, TEXT("Landed velocity for character [%s] after falling = %.2f"), *GetName(),
+    UE_LOG(STUBaseCharacterLog, Verbose, TEXT("Landed velocity for character [%s] after falling = %.2f"), *GetName(),
            LandedVelocity)
 
     // player doesn't reach minimal height to be damaged from falling
@@ -172,28 +175,8 @@ void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
     const float InterpolatedDamage =
         FMath::GetMappedRangeValueClamped(LandedDamageVelocityRange, LandedDamageRange, LandedVelocity);
 
-    UE_LOG(ASTUBaseCharacterLog, Verbose, TEXT("Received damage from falling for character [%s] = %.2f"), *GetName(),
+    UE_LOG(STUBaseCharacterLog, Verbose, TEXT("Received damage from falling for character [%s] = %.2f"), *GetName(),
            InterpolatedDamage)
 
     TakeDamage(InterpolatedDamage, FDamageEvent{}, nullptr, nullptr);
-}
-
-void ASTUBaseCharacter::SpawnWeapon()
-{
-    if (GetWorld() == nullptr)
-    {
-        return;
-    }
-
-    check(WeaponClass.Get() != nullptr);
-
-    // FActorSpawnParameters ActorSpawnParameters;
-    // ActorSpawnParameters.Owner = this;
-    ASTUBaseWeapon* Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(WeaponClass /*, ActorSpawnParameters*/);
-
-    if (Weapon)
-    {
-        const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, false);
-        Weapon->AttachToComponent(GetMesh(), TransformRules, "WeaponPoint");
-    }
 }
