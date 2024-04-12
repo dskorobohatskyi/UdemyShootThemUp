@@ -52,4 +52,5 @@ void USTUWeaponComponent::SpawnWeapon()
 
     const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, false);
     CurrentWeapon->AttachToComponent(Owner->GetMesh(), TransformRules, WeaponSocketName);
+    CurrentWeapon->SetOwner(GetOwner()); // base character should be the new owner of weapon
 }
