@@ -40,4 +40,8 @@ protected:
     FVector GetMuzzleSocketLocation() const;
 
     bool MakeHit(FHitResult& HitResult);
+
+private:
+    //(#initiative)
+    bool IsPhysicallyPossibleShot(const FVector& ShootDirection, const FVector& TargetDirection) const;
 };

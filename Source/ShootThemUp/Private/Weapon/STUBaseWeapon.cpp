@@ -47,9 +47,15 @@ void ASTUBaseWeapon::MakeShot()
         return;
     }
 
-    if (HitResult.bBlockingHit)
+    // (#initiative: IsPhysicallyPossibleShot) 
+    // Check to not shoot enemy if it stands behind main character but player aim hits the enemy.
+    const FVector MuzzleLocation = GetMuzzleSocketLocation();
+    const FVector ShootDirection = HitResult.TraceEnd - HitResult.TraceStart;
+    const FVector PlayerToEnemyDirection = (HitResult.ImpactPoint - MuzzleLocation).GetSafeNormal();
+
+    if (HitResult.bBlockingHit && IsPhysicallyPossibleShot(ShootDirection, PlayerToEnemyDirection))
     {
-        DrawDebugLine(GetWorld(), GetMuzzleSocketLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.f, 0, 3.f);
+        DrawDebugLine(GetWorld(), MuzzleLocation, HitResult.ImpactPoint, FColor::Red, false, 3.f, 0, 3.f);
         DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5.f, 24, FColor::Yellow, false, 4.f, 0, 3.f);
     }
     else
@@ -110,4 +116,19 @@ bool ASTUBaseWeapon::MakeHit(FHitResult& HitResult)
                                                         ECollisionChannel::ECC_Visibility, CollisionQueryParams);
 
     return true;
+}
+
+//(#initiative)
+bool ASTUBaseWeapon::IsPhysicallyPossibleShot(const FVector& ShootDirection, const FVector& TargetDirection) const
+{
+    const float DotProductValue = FVector::DotProduct(ShootDirection, TargetDirection);
+    const FVector CrossProductVector = FVector::CrossProduct(ShootDirection, TargetDirection);
+
+    const float SideCorrectness = FMath::Sign(CrossProductVector.Z);
+    const float DegreeBetweenVectors = FMath::RadiansToDegrees(FMath::Acos(DotProductValue) * SideCorrectness);
+
+    UE_LOG(STUBaseWeaponLog, Verbose, TEXT("Degree: %.2f"), DegreeBetweenVectors);
+
+    const bool bIsPhysicallyPossibleShot = DegreeBetweenVectors < 90.f;
+    return bIsPhysicallyPossibleShot;
 }
