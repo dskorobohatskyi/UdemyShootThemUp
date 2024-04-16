@@ -29,6 +29,9 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     float TraceMaxDistance = 1500.f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+    float DamageAmount = 10.f;
+
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
 
@@ -39,7 +42,8 @@ protected:
     bool GetCameraViewPoint(FVector& OutViewLocation, FRotator& ViewRotation) const;
     FVector GetMuzzleSocketLocation() const;
 
-    bool MakeHit(FHitResult& HitResult);
+    bool MakeHitSafeForOwner(FHitResult& HitResult);
+    void MakeDamage(FHitResult& HitResult);
 
 private:
     //(#initiative)

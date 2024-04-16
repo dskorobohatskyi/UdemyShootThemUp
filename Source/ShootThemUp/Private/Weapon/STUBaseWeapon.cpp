@@ -42,21 +42,23 @@ void ASTUBaseWeapon::MakeShot()
     }
 
     FHitResult HitResult;
-    if (!MakeHit(HitResult))
+    if (!MakeHitSafeForOwner(HitResult))
     {
         return;
     }
 
-    // (#initiative: IsPhysicallyPossibleShot) 
+    // (#initiative: IsPhysicallyPossibleShot)
     // Check to not shoot enemy if it stands behind main character but player aim hits the enemy.
     const FVector MuzzleLocation = GetMuzzleSocketLocation();
-    const FVector ShootDirection = HitResult.TraceEnd - HitResult.TraceStart;
+    const FVector ShootDirection = (HitResult.TraceEnd - HitResult.TraceStart).GetSafeNormal();
     const FVector PlayerToEnemyDirection = (HitResult.ImpactPoint - MuzzleLocation).GetSafeNormal();
 
     if (HitResult.bBlockingHit && IsPhysicallyPossibleShot(ShootDirection, PlayerToEnemyDirection))
     {
         DrawDebugLine(GetWorld(), MuzzleLocation, HitResult.ImpactPoint, FColor::Red, false, 3.f, 0, 3.f);
         DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5.f, 24, FColor::Yellow, false, 4.f, 0, 3.f);
+
+        MakeDamage(HitResult);
     }
     else
     {
@@ -92,7 +94,7 @@ FVector ASTUBaseWeapon::GetMuzzleSocketLocation() const
     return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 }
 
-bool ASTUBaseWeapon::MakeHit(FHitResult& HitResult)
+bool ASTUBaseWeapon::MakeHitSafeForOwner(FHitResult& HitResult)
 {
     if (!GetWorld())
     {
@@ -116,6 +118,19 @@ bool ASTUBaseWeapon::MakeHit(FHitResult& HitResult)
                                                         ECollisionChannel::ECC_Visibility, CollisionQueryParams);
 
     return true;
+}
+
+void ASTUBaseWeapon::MakeDamage(FHitResult& HitResult)
+{
+    AActor* DamagedActor = HitResult.GetActor();
+    if (DamagedActor)
+    {
+        check(DamagedActor != GetOwner());
+        // ShootDirection should be normalized for FPointDamageEvent ctor
+        const FVector ShootDirection = (HitResult.TraceEnd - HitResult.TraceStart).GetSafeNormal();
+        const FPointDamageEvent DamageEvent(DamageAmount, HitResult, ShootDirection, nullptr);
+        DamagedActor->TakeDamage(DamageAmount, DamageEvent, GetPlayerController(), /*GetOwner()*/ this);
+    }
 }
 
 //(#initiative)
