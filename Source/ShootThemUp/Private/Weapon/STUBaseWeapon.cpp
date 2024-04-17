@@ -50,7 +50,7 @@ void ASTUBaseWeapon::MakeShot()
     // (#initiative: IsPhysicallyPossibleShot)
     // Check to not shoot enemy if it stands behind main character but player aim hits the enemy.
     const FVector MuzzleLocation = GetMuzzleSocketLocation();
-    const FVector ShootDirection = (HitResult.TraceEnd - HitResult.TraceStart).GetSafeNormal();
+    const FVector ShootDirection = CalculateShootDirectionFromHit(HitResult); // should be okay, since implementation doesn't require actual hit to be
     const FVector PlayerToEnemyDirection = (HitResult.ImpactPoint - MuzzleLocation).GetSafeNormal();
 
     if (HitResult.bBlockingHit && IsPhysicallyPossibleShot(ShootDirection, PlayerToEnemyDirection))
@@ -77,7 +77,7 @@ APlayerController* ASTUBaseWeapon::GetPlayerController() const
     return Character->GetController<APlayerController>();
 }
 
-bool ASTUBaseWeapon::GetCameraViewPoint(FVector& OutViewLocation, FRotator& ViewRotation) const
+bool ASTUBaseWeapon::GetCameraViewPoint(FVector& OutViewLocation, FRotator& OutViewRotation) const
 {
     APlayerController* Controller = GetPlayerController();
     if (!Controller)
@@ -85,7 +85,7 @@ bool ASTUBaseWeapon::GetCameraViewPoint(FVector& OutViewLocation, FRotator& View
         return false;
     }
 
-    Controller->GetPlayerViewPoint(OutViewLocation, ViewRotation);
+    Controller->GetPlayerViewPoint(OutViewLocation, OutViewRotation);
     return true;
 }
 
@@ -94,7 +94,7 @@ FVector ASTUBaseWeapon::GetMuzzleSocketLocation() const
     return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 }
 
-bool ASTUBaseWeapon::MakeHitSafeForOwner(FHitResult& HitResult)
+bool ASTUBaseWeapon::MakeHitSafeForOwner(FHitResult& InHitResult)
 {
     if (!GetWorld())
     {
@@ -114,30 +114,30 @@ bool ASTUBaseWeapon::MakeHitSafeForOwner(FHitResult& HitResult)
 
     FCollisionQueryParams CollisionQueryParams;
     CollisionQueryParams.AddIgnoredActor(GetOwner());
-    const bool _ = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd,
+    const bool _ = GetWorld()->LineTraceSingleByChannel(InHitResult, TraceStart, TraceEnd,
                                                         ECollisionChannel::ECC_Visibility, CollisionQueryParams);
 
     return true;
 }
 
-void ASTUBaseWeapon::MakeDamage(FHitResult& HitResult)
+void ASTUBaseWeapon::MakeDamage(FHitResult& InHitResult)
 {
-    AActor* DamagedActor = HitResult.GetActor();
+    AActor* DamagedActor = InHitResult.GetActor();
     if (DamagedActor)
     {
         check(DamagedActor != GetOwner());
         // ShootDirection should be normalized for FPointDamageEvent ctor
-        const FVector ShootDirection = (HitResult.TraceEnd - HitResult.TraceStart).GetSafeNormal();
-        const FPointDamageEvent DamageEvent(DamageAmount, HitResult, ShootDirection, nullptr);
+        const FVector ShootDirection = CalculateShootDirectionFromHit(InHitResult);
+        const FPointDamageEvent DamageEvent(DamageAmount, InHitResult, ShootDirection, nullptr);
         DamagedActor->TakeDamage(DamageAmount, DamageEvent, GetPlayerController(), /*GetOwner()*/ this);
     }
 }
 
 //(#initiative)
-bool ASTUBaseWeapon::IsPhysicallyPossibleShot(const FVector& ShootDirection, const FVector& TargetDirection) const
+bool ASTUBaseWeapon::IsPhysicallyPossibleShot(const FVector& InShootDirection, const FVector& InTargetDirection) const
 {
-    const float DotProductValue = FVector::DotProduct(ShootDirection, TargetDirection);
-    const FVector CrossProductVector = FVector::CrossProduct(ShootDirection, TargetDirection);
+    const float DotProductValue = FVector::DotProduct(InShootDirection, InTargetDirection);
+    const FVector CrossProductVector = FVector::CrossProduct(InShootDirection, InTargetDirection);
 
     const float SideCorrectness = FMath::Sign(CrossProductVector.Z);
     const float DegreeBetweenVectors = FMath::RadiansToDegrees(FMath::Acos(DotProductValue) * SideCorrectness);
@@ -146,4 +146,9 @@ bool ASTUBaseWeapon::IsPhysicallyPossibleShot(const FVector& ShootDirection, con
 
     const bool bIsPhysicallyPossibleShot = DegreeBetweenVectors < 90.f;
     return bIsPhysicallyPossibleShot;
+}
+
+FVector ASTUBaseWeapon::CalculateShootDirectionFromHit(const FHitResult& InHitResult) const
+{
+    return (InHitResult.TraceEnd - InHitResult.TraceStart).GetSafeNormal();
 }

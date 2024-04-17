@@ -42,10 +42,11 @@ protected:
     bool GetCameraViewPoint(FVector& OutViewLocation, FRotator& ViewRotation) const;
     FVector GetMuzzleSocketLocation() const;
 
-    bool MakeHitSafeForOwner(FHitResult& HitResult);
-    void MakeDamage(FHitResult& HitResult);
+    bool MakeHitSafeForOwner(FHitResult& InHitResult);
+    void MakeDamage(FHitResult& InHitResult);
 
 private:
     //(#initiative)
-    bool IsPhysicallyPossibleShot(const FVector& ShootDirection, const FVector& TargetDirection) const;
+    bool IsPhysicallyPossibleShot(const FVector& InShootDirection, const FVector& InTargetDirection) const;
+    FVector CalculateShootDirectionFromHit(const FHitResult& InHitResult) const;
 };
