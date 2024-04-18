@@ -131,5 +131,6 @@ bool ASTUBaseWeapon::IsPhysicallyPossibleShot(const FVector& InShootDirection, c
 
 FVector ASTUBaseWeapon::CalculateShootDirectionFromHit(const FHitResult& InHitResult) const
 {
-    return (InHitResult.TraceEnd - InHitResult.TraceStart).GetSafeNormal();
+    const FVector EndPoint = InHitResult.bBlockingHit ? InHitResult.ImpactPoint : InHitResult.TraceEnd;
+    return (EndPoint - InHitResult.TraceStart).GetSafeNormal();
 }
