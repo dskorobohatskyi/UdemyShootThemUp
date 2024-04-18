@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Engine/TimerHandle.h"
 #include "STUBaseWeapon.generated.h"
 
 class USkeletalMeshComponent;
@@ -17,7 +17,8 @@ public:
     // Sets default values for this actor's properties
     ASTUBaseWeapon();
 
-    virtual void Fire();
+    virtual void StartFire();
+    virtual void StopFire();
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -29,8 +30,15 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     float TraceMaxDistance = 1500.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+    // I guess EditAnywhere can be used for powerups in the future, but for now VisibleAnywhere is okay
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shooting")
     float DamageAmount = 10.f;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shooting")
+    float IntervalBetweenShots = 0.1f;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shooting")
+    float WeaponSpreadAngleDegrees = 1.5f;
 
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
@@ -48,5 +56,9 @@ protected:
 private:
     //(#initiative)
     bool IsPhysicallyPossibleShot(const FVector& InShootDirection, const FVector& InTargetDirection) const;
+    void AddSpreadForShooting(FVector& InOutShootDirection);
     FVector CalculateShootDirectionFromHit(const FHitResult& InHitResult) const;
+
+private:
+    FTimerHandle ShootTimerHandle;
 };

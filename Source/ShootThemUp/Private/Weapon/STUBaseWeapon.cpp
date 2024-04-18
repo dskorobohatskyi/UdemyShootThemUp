@@ -10,6 +10,8 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
 
+#include "TimerManager.h"
+
 DEFINE_LOG_CATEGORY_STATIC(STUBaseWeaponLog, Display, All);
 
 // Sets default values
@@ -21,9 +23,23 @@ ASTUBaseWeapon::ASTUBaseWeapon()
     SetRootComponent(WeaponMesh);
 }
 
-void ASTUBaseWeapon::Fire()
+void ASTUBaseWeapon::StartFire()
 {
     MakeShot();
+
+    if (GetWorld())
+    {
+        GetWorldTimerManager().SetTimer(ShootTimerHandle, this, &ASTUBaseWeapon::MakeShot, IntervalBetweenShots,
+                                        true); // IntervalBetweenShots will be used as delay
+    }
+}
+
+void ASTUBaseWeapon::StopFire()
+{
+    if (GetWorld() && ShootTimerHandle.IsValid())
+    {
+        GetWorldTimerManager().ClearTimer(ShootTimerHandle);
+    }
 }
 
 // Called when the game starts or when spawned
@@ -109,7 +125,8 @@ bool ASTUBaseWeapon::MakeHitSafeForOwner(FHitResult& InHitResult)
     }
 
     const FVector TraceStart = ViewLocation;
-    const FVector ShootDirection = ViewRotation.Vector();
+    FVector ShootDirection = ViewRotation.Vector();
+    AddNoiseForShooting(ShootDirection);
     const FVector TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
 
     FCollisionQueryParams CollisionQueryParams;
@@ -146,6 +163,11 @@ bool ASTUBaseWeapon::IsPhysicallyPossibleShot(const FVector& InShootDirection, c
 
     const bool bIsPhysicallyPossibleShot = DegreeBetweenVectors < 90.f;
     return bIsPhysicallyPossibleShot;
+}
+
+void ASTUBaseWeapon::AddSpreadForShooting(FVector& InOutShootDirection)
+{
+    InOutShootDirection = FMath::VRandCone(InOutShootDirection, FMath::DegreesToRadians(WeaponSpreadAngleDegrees));
 }
 
 FVector ASTUBaseWeapon::CalculateShootDirectionFromHit(const FHitResult& InHitResult) const
