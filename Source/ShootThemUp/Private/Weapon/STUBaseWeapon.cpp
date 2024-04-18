@@ -126,7 +126,7 @@ bool ASTUBaseWeapon::MakeHitSafeForOwner(FHitResult& InHitResult)
 
     const FVector TraceStart = ViewLocation;
     FVector ShootDirection = ViewRotation.Vector();
-    AddNoiseForShooting(ShootDirection);
+    AddSpreadForShooting(ShootDirection);
     const FVector TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
 
     FCollisionQueryParams CollisionQueryParams;
