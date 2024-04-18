@@ -34,31 +34,22 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shooting")
     float DamageAmount = 10.f;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shooting")
-    float IntervalBetweenShots = 0.1f;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shooting")
-    float WeaponSpreadAngleDegrees = 1.5f;
-
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
 
 protected:
-    void MakeShot();
+    virtual void MakeShot();
+    bool MakeHitSafeForOwner(const FVector& InTraceStart, const FVector InTraceEnd, FHitResult& OutHitResult);
+    virtual bool GetTraceData(FVector& OutTraceStart, FVector& OutTraceEnd);
+    virtual void ModifyShootDirectionForTrace(FVector& InOutShotDirection) {}
 
     APlayerController* GetPlayerController() const;
     bool GetCameraViewPoint(FVector& OutViewLocation, FRotator& ViewRotation) const;
     FVector GetMuzzleSocketLocation() const;
 
-    bool MakeHitSafeForOwner(FHitResult& InHitResult);
     void MakeDamage(FHitResult& InHitResult);
 
-private:
     //(#initiative)
-    bool IsPhysicallyPossibleShot(const FVector& InShootDirection, const FVector& InTargetDirection) const;
-    void AddSpreadForShooting(FVector& InOutShootDirection);
+    virtual bool IsPhysicallyPossibleShot(const FVector& InShootDirection, const FVector& InTargetDirection) const;
     FVector CalculateShootDirectionFromHit(const FHitResult& InHitResult) const;
-
-private:
-    FTimerHandle ShootTimerHandle;
 };
