@@ -50,6 +50,5 @@ protected:
     void MakeDamage(FHitResult& InHitResult);
 
     //(#initiative)
-    virtual bool IsPhysicallyPossibleShot(const FVector& InShootDirection, const FVector& InTargetDirection) const;
-    FVector CalculateShootDirectionFromHit(const FHitResult& InHitResult) const;
+    virtual bool IsPhysicallyPossibleHitFromMuzzle(const FHitResult& InHitResult) const;
 };
