@@ -20,19 +20,39 @@ public:
     void StartFire();
     void StopFire();
 
+    void SwitchToNextWeapon();
+
 protected:
     // Called when the game starts
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    TSubclassOf<ASTUBaseWeapon> WeaponClass;
+    TArray<TSubclassOf<ASTUBaseWeapon>> WeaponClasses;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    FName WeaponSocketName = TEXT("WeaponPoint");
+    FName WeaponEquipSocketName = TEXT("WeaponPoint");
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    FName WeaponArmorySocketName = TEXT("ArmorySocket");
 
 private:
-    void SpawnWeapon();
+    void SpawnWeapons();
 
     UPROPERTY()
-    ASTUBaseWeapon* CurrentWeapon;
+    ASTUBaseWeapon* CurrentWeapon = nullptr;
+
+    TArray<ASTUBaseWeapon*> Weapons;
+
+    int32 CurrentWeaponIndex = 0;
+
+
+    void AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneComponent* MeshComponent, const FName& SocketName);
+    void EquipWeapon(int32 WeaponIndex);
+
+
+    // my code
+    void PutWeaponToArmory(ASTUBaseWeapon* Weapon);
+
+    USkeletalMeshComponent* GetOwnerSkeletalMesh() const;
 };
