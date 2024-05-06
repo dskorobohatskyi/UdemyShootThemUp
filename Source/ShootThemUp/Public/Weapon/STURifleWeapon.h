@@ -19,13 +19,18 @@ public:
     virtual void StopFire() override;
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shooting")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shooting")
     float IntervalBetweenShots = 0.1f;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shooting")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shooting")
     float WeaponSpreadAngleDegrees = 1.5f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shooting")
+    float DamageAmount = 10.f;
+
     virtual void MakeShot() override;
+
+    void MakeDamage(FHitResult& InHitResult);
 
     // GetTraceData impl is okay, but let's add weapon spread in ModifyShootDirectionForTrace
     virtual void ModifyShootDirectionForTrace(FVector& InOutShotDirection) override;

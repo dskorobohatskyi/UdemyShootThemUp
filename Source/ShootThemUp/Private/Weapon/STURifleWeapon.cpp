@@ -58,6 +58,20 @@ void ASTURifleWeapon::MakeShot()
     }
 }
 
+void ASTURifleWeapon::MakeDamage(FHitResult& InHitResult)
+{
+    AActor* DamagedActor = InHitResult.GetActor();
+    if (DamagedActor)
+    {
+        check(DamagedActor != GetOwner());
+        check(InHitResult.bBlockingHit);
+        // ShootDirection should be normalized for FPointDamageEvent ctor
+        const FVector ShootDirection = (InHitResult.ImpactPoint - InHitResult.TraceStart).GetSafeNormal();
+        const FPointDamageEvent DamageEvent(DamageAmount, InHitResult, ShootDirection, nullptr);
+        DamagedActor->TakeDamage(DamageAmount, DamageEvent, GetPlayerController(), /*GetOwner()*/ this);
+    }
+}
+
 void ASTURifleWeapon::ModifyShootDirectionForTrace(FVector& InOutShotDirection)
 {
     AddSpreadForShooting(InOutShotDirection);

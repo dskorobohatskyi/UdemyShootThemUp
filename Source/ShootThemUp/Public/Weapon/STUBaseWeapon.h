@@ -24,15 +24,11 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* WeaponMesh;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     FName MuzzleSocketName = "MuzzleFlashSocket";
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     float TraceMaxDistance = 1500.f;
-
-    // I guess EditAnywhere can be used for powerups in the future, but for now VisibleAnywhere is okay
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shooting")
-    float DamageAmount = 10.f;
 
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
@@ -46,8 +42,6 @@ protected:
     APlayerController* GetPlayerController() const;
     bool GetCameraViewPoint(FVector& OutViewLocation, FRotator& ViewRotation) const;
     FVector GetMuzzleSocketLocation() const;
-
-    void MakeDamage(FHitResult& InHitResult);
 
     //(#initiative)
     virtual bool IsPhysicallyPossibleHitFromMuzzle(const FHitResult& InHitResult) const;
