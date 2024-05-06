@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "Weapon/STUBaseWeapon.h"
 
+#include "Animations/STU_EquipFinishedAnimNotify.h"
+
 // Sets default values for this component's properties
 USTUWeaponComponent::USTUWeaponComponent()
 {
@@ -12,7 +14,7 @@ USTUWeaponComponent::USTUWeaponComponent()
 
 void USTUWeaponComponent::StartFire()
 {
-    if (CurrentWeapon == nullptr)
+    if (!CanFire())
     {
         return;
     }
@@ -22,7 +24,6 @@ void USTUWeaponComponent::StartFire()
 
 void USTUWeaponComponent::StopFire()
 {
-    // TODO need to stop fire
     if (CurrentWeapon == nullptr)
     {
         return;
@@ -38,8 +39,10 @@ void USTUWeaponComponent::BeginPlay()
 
     SpawnWeapons();
 
+    InitAnimations();
+
     CurrentWeaponIndex = 0;
-    EquipWeapon(CurrentWeaponIndex);
+    EquipWeapon(CurrentWeaponIndex, false);
 }
 
 void USTUWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -92,11 +95,11 @@ void USTUWeaponComponent::AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneCom
     Weapon->AttachToComponent(MeshComponent, TransformRules, SocketName);
 }
 
-void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
+void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex, bool bIsAnimating)
 {
     check(WeaponIndex < Weapons.Num());
 
-    USkeletalMeshComponent* OwnerMesh = GetOwnerSkeletalMesh();
+    auto OwnerMesh = GetOwnerSkeletalMesh();
     if (!OwnerMesh)
     {
         return;
@@ -106,6 +109,12 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
     {
         CurrentWeapon->StopFire();
         PutWeaponToArmory(CurrentWeapon);
+    }
+
+    if (bIsAnimating)
+    {
+        bIsEquipInProgress = true;
+        PlayAnimMontage(EquipAnimMontage);
     }
 
     AttachWeaponToSocket(Weapons[WeaponIndex], OwnerMesh, WeaponEquipSocketName);
@@ -124,8 +133,23 @@ void USTUWeaponComponent::PutWeaponToArmory(ASTUBaseWeapon* Weapon)
 
 void USTUWeaponComponent::SwitchToNextWeapon()
 {
+    if (!CanEquip())
+    {
+        return;
+    }
+
     CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
     EquipWeapon(CurrentWeaponIndex);
+}
+
+bool USTUWeaponComponent::CanFire() const
+{
+    return CurrentWeapon && !bIsEquipInProgress;
+}
+
+bool USTUWeaponComponent::CanEquip() const
+{
+    return !bIsEquipInProgress;
 }
 
 USkeletalMeshComponent* USTUWeaponComponent::GetOwnerSkeletalMesh() const
@@ -136,4 +160,45 @@ USkeletalMeshComponent* USTUWeaponComponent::GetOwnerSkeletalMesh() const
         return nullptr;
     }
     return Owner->GetMesh();
+}
+
+void USTUWeaponComponent::InitAnimations()
+{
+    if (!EquipAnimMontage)
+    {
+        return;
+    }
+
+    const auto MontageNotifies = EquipAnimMontage->Notifies;
+    for (auto& NotifyEvent : MontageNotifies)
+    {
+        auto EquipFinishedNotify = Cast<USTU_EquipFinishedAnimNotify>(NotifyEvent.Notify.Get());
+        if (EquipFinishedNotify)
+        {
+            EquipFinishedNotify->OnEquipFinished.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
+            break;
+        }
+    }
+}
+
+void USTUWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
+{
+    check(EquipAnimMontage);
+    ACharacter* Owner = Cast<ACharacter>(GetOwner());
+    if (!Owner)
+    {
+        return;
+    }
+
+    Owner->PlayAnimMontage(EquipAnimMontage);
+}
+
+void USTUWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
+{
+    if (!MeshComponent || GetOwnerSkeletalMesh() != MeshComponent)
+    {
+        return;
+    }
+
+    bIsEquipInProgress = false;
 }

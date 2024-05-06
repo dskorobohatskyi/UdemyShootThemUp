@@ -7,6 +7,7 @@
 #include "STUWeaponComponent.generated.h"
 
 class ASTUBaseWeapon;
+class UAnimMontage;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
@@ -22,6 +23,9 @@ public:
 
     void SwitchToNextWeapon();
 
+    bool CanFire() const;
+    bool CanEquip() const;
+
 protected:
     // Called when the game starts
     virtual void BeginPlay() override;
@@ -36,6 +40,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     FName WeaponArmorySocketName = TEXT("ArmorySocket");
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    UAnimMontage* EquipAnimMontage;
+
 private:
     void SpawnWeapons();
 
@@ -46,10 +53,15 @@ private:
 
     int32 CurrentWeaponIndex = 0;
 
+    bool bIsEquipInProgress = false;
 
     void AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneComponent* MeshComponent, const FName& SocketName);
-    void EquipWeapon(int32 WeaponIndex);
+    void EquipWeapon(int32 WeaponIndex, bool bIsAnimating = true);
+    
+    void InitAnimations();
+    void OnEquipFinished(USkeletalMeshComponent* MeshComponent);
 
+    void PlayAnimMontage(UAnimMontage* Animation);
 
     // my code
     void PutWeaponToArmory(ASTUBaseWeapon* Weapon);
