@@ -34,7 +34,7 @@ void ASTULauncherWeapon::MakeShot()
     {
         // where to initialize hit
         const FVector EndPoint = HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd;
-        auto ShootDirection = (EndPoint - TraceStart).GetSafeNormal();
+        const FVector ShootDirection = (EndPoint - GetMuzzleSocketLocation()).GetSafeNormal();
 
         Projectile->SetMovementDirection(ShootDirection);
         Projectile->FinishSpawning(SpawnTransform);
