@@ -33,6 +33,8 @@ void ASTUBaseWeapon::BeginPlay()
     Super::BeginPlay();
 
     check(WeaponMesh);
+
+    CurrentAmmo = DefaultAmmo;
 }
 
 void ASTUBaseWeapon::MakeShot()
@@ -126,4 +128,55 @@ bool ASTUBaseWeapon::IsPhysicallyPossibleHitFromMuzzle(const FHitResult& InHitRe
 
     const bool bIsPhysicallyPossibleShot = DegreeBetweenVectors < 90.f;
     return bIsPhysicallyPossibleShot;
+}
+
+bool ASTUBaseWeapon::IsAmmoEmpty() const
+{
+    return !CurrentAmmo.bIsInfinite && CurrentAmmo.Clips == 0 && IsClipEmpty();
+}
+
+bool ASTUBaseWeapon::IsClipEmpty() const
+{
+    return CurrentAmmo.Bullets == 0;
+}
+
+void ASTUBaseWeapon::DecreaseAmmo()
+{
+    check(CurrentAmmo.Bullets != 0);
+
+    CurrentAmmo.Bullets--;
+
+    LogAmmo();
+
+    // TODO expose to manual reloading feature
+    const bool bIsAutoReloadEnabled = true;
+    if (bIsAutoReloadEnabled)
+    {
+        if (IsClipEmpty() && !IsAmmoEmpty())
+        {
+            ChangeClip();
+        }
+    }
+}
+
+void ASTUBaseWeapon::ChangeClip()
+{
+    check(CurrentAmmo.Clips != 0 || CurrentAmmo.bIsInfinite);
+    UE_LOG(STUBaseWeaponLog, Display, TEXT("Ammo: changing"));
+
+    if (!CurrentAmmo.bIsInfinite)
+    {
+        CurrentAmmo.Clips--;
+    }
+    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+
+    LogAmmo();
+}
+
+void ASTUBaseWeapon::LogAmmo()
+{
+    const FString AmmoOutput =
+        FString::Printf(TEXT("Ammo: %d / %s"), CurrentAmmo.Bullets,
+                        (CurrentAmmo.bIsInfinite ? *FString(TEXT("\u221e")) : *FString::FromInt(CurrentAmmo.Clips)));
+    UE_LOG(STUBaseWeaponLog, Display, TEXT("%s"), *AmmoOutput);
 }

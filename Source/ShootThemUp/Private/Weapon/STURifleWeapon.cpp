@@ -25,6 +25,12 @@ void ASTURifleWeapon::StopFire()
 
 void ASTURifleWeapon::MakeShot()
 {
+    if (IsAmmoEmpty())
+    {
+        StopFire();
+        return;
+    }
+
     if (!GetWorld())
     {
         return;
@@ -33,6 +39,7 @@ void ASTURifleWeapon::MakeShot()
     FVector TraceStart, TraceEnd;
     if (!GetTraceData(TraceStart, TraceEnd))
     {
+        StopFire(); // Don't understand why we need that in the course
         return;
     }
 
@@ -56,6 +63,8 @@ void ASTURifleWeapon::MakeShot()
     {
         DrawDebugLine(GetWorld(), MuzzleLocation, HitResult.TraceEnd, FColor::Red, false, 3.f, 0, 3.f);
     }
+
+    DecreaseAmmo();
 }
 
 void ASTURifleWeapon::MakeDamage(FHitResult& InHitResult)

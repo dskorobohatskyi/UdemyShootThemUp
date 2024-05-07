@@ -10,6 +10,11 @@ void ASTULauncherWeapon::StartFire()
 
 void ASTULauncherWeapon::MakeShot()
 {
+    if (IsAmmoEmpty())
+    {
+        return;
+    }
+
     if (!GetWorld())
     {
         return;
@@ -39,4 +44,6 @@ void ASTULauncherWeapon::MakeShot()
         Projectile->SetMovementDirection(ShootDirection);
         Projectile->FinishSpawning(SpawnTransform);
     }
+
+    DecreaseAmmo();
 }
