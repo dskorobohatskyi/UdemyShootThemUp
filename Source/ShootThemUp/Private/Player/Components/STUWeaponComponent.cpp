@@ -5,6 +5,7 @@
 #include "Weapon/STUBaseWeapon.h"
 
 #include "Animations/STU_EquipFinishedAnimNotify.h"
+#include "Animations/STU_ReloadFinishedAnimNotify.h"
 
 // Sets default values for this component's properties
 USTUWeaponComponent::USTUWeaponComponent()
@@ -61,7 +62,7 @@ void USTUWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void USTUWeaponComponent::SpawnWeapons()
 {
-    check(WeaponClasses.Num() != 0);
+    check(WeaponDatas.Num() != 0);
 
     ACharacter* Owner = Cast<ACharacter>(GetOwner());
 
@@ -70,9 +71,9 @@ void USTUWeaponComponent::SpawnWeapons()
         return;
     }
 
-    for (const auto WeaponClass : WeaponClasses)
+    for (const auto& WeaponData : WeaponDatas)
     {
-        auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(WeaponClass);
+        auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(WeaponData.WeaponClass);
         if (!Weapon)
             continue;
 
@@ -97,7 +98,7 @@ void USTUWeaponComponent::AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneCom
 
 void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex, bool bIsAnimating)
 {
-    check(WeaponIndex < Weapons.Num());
+    check(WeaponIndex >= 0 && WeaponIndex < Weapons.Num());
 
     auto OwnerMesh = GetOwnerSkeletalMesh();
     if (!OwnerMesh)
@@ -119,6 +120,13 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex, bool bIsAnimating)
 
     AttachWeaponToSocket(Weapons[WeaponIndex], OwnerMesh, WeaponEquipSocketName);
     CurrentWeapon = Weapons[WeaponIndex];
+
+    // code below can fail if some sort logic is present
+    // CurrentReloadAnimMontage = WeaponDatas[CurrentWeaponIndex].ReloadAnimMontage;
+    const auto CurrentWeaponData = WeaponDatas.FindByPredicate([this](const FWeaponData& Data) { //
+        return CurrentWeapon->GetClass() == Data.WeaponClass;                                    //
+    });
+    CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
 }
 
 void USTUWeaponComponent::PutWeaponToArmory(ASTUBaseWeapon* Weapon)
@@ -138,18 +146,40 @@ void USTUWeaponComponent::SwitchToNextWeapon()
         return;
     }
 
+    CurrentWeapon->StopFire(); // my code
+
     CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
     EquipWeapon(CurrentWeaponIndex);
 }
 
+void USTUWeaponComponent::Reload()
+{
+    if (!CanReload())
+    {
+        return;
+    }
+
+    CurrentWeapon->StopFire(); // my code
+
+    bIsReloadInProgress = true;
+
+    PlayAnimMontage(CurrentReloadAnimMontage);
+}
+
 bool USTUWeaponComponent::CanFire() const
 {
-    return CurrentWeapon && !bIsEquipInProgress;
+    return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress;
 }
 
 bool USTUWeaponComponent::CanEquip() const
 {
-    return !bIsEquipInProgress;
+    return !bIsEquipInProgress && !bIsReloadInProgress;
+}
+
+bool USTUWeaponComponent::CanReload() const
+{
+    // TODO add ammo check c'mon
+    return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress;
 }
 
 USkeletalMeshComponent* USTUWeaponComponent::GetOwnerSkeletalMesh() const
@@ -164,33 +194,32 @@ USkeletalMeshComponent* USTUWeaponComponent::GetOwnerSkeletalMesh() const
 
 void USTUWeaponComponent::InitAnimations()
 {
-    if (!EquipAnimMontage)
+    auto EquipFinishedNotify = FindNotifyByClassSafe<USTU_EquipFinishedAnimNotify>(EquipAnimMontage);
+    if (EquipFinishedNotify)
     {
-        return;
+        EquipFinishedNotify->OnNotifyTriggered.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
     }
 
-    const auto MontageNotifies = EquipAnimMontage->Notifies;
-    for (auto& NotifyEvent : MontageNotifies)
+    for (const auto& WeaponData : WeaponDatas)
     {
-        auto EquipFinishedNotify = Cast<USTU_EquipFinishedAnimNotify>(NotifyEvent.Notify.Get());
-        if (EquipFinishedNotify)
+        auto ReloadFinishedNotify = FindNotifyByClassSafe<USTU_ReloadFinishedAnimNotify>(WeaponData.ReloadAnimMontage);
+        if (ReloadFinishedNotify)
         {
-            EquipFinishedNotify->OnEquipFinished.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
-            break;
+            ReloadFinishedNotify->OnNotifyTriggered.AddUObject(this, &USTUWeaponComponent::OnReloadFinished);
         }
     }
 }
 
 void USTUWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
 {
-    check(EquipAnimMontage);
+    check(Animation);
     ACharacter* Owner = Cast<ACharacter>(GetOwner());
     if (!Owner)
     {
         return;
     }
 
-    Owner->PlayAnimMontage(EquipAnimMontage);
+    Owner->PlayAnimMontage(Animation);
 }
 
 void USTUWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
@@ -201,4 +230,15 @@ void USTUWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
     }
 
     bIsEquipInProgress = false;
+}
+
+void USTUWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent)
+{
+    if (!MeshComponent || GetOwnerSkeletalMesh() != MeshComponent)
+    {
+        return;
+    }
+
+    bIsReloadInProgress = false;
+    // TODO CurrentWeapon change clip should be called
 }
