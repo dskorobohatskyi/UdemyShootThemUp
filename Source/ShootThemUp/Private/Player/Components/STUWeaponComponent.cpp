@@ -79,6 +79,7 @@ void USTUWeaponComponent::SpawnWeapons()
 
         Weapon->SetOwner(Owner); // base character should be the new owner of weapon
         PutWeaponToArmory(Weapon);
+        Weapon->OnClipEmpty.AddUObject(this, &USTUWeaponComponent::OnClipEmptyHandle);
 
         Weapons.Add(Weapon);
     }
@@ -154,16 +155,7 @@ void USTUWeaponComponent::SwitchToNextWeapon()
 
 void USTUWeaponComponent::Reload()
 {
-    if (!CanReload())
-    {
-        return;
-    }
-
-    CurrentWeapon->StopFire(); // my code
-
-    bIsReloadInProgress = true;
-
-    PlayAnimMontage(CurrentReloadAnimMontage);
+    ChangeClip();
 }
 
 bool USTUWeaponComponent::CanFire() const
@@ -178,8 +170,7 @@ bool USTUWeaponComponent::CanEquip() const
 
 bool USTUWeaponComponent::CanReload() const
 {
-    // TODO add ammo check c'mon
-    return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress;
+    return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress && CurrentWeapon->CanReload();
 }
 
 USkeletalMeshComponent* USTUWeaponComponent::GetOwnerSkeletalMesh() const
@@ -232,6 +223,31 @@ void USTUWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
     bIsEquipInProgress = false;
 }
 
+void USTUWeaponComponent::OnClipEmptyHandle()
+{
+    // TODO probably should be virtual method of base weapon (rifle override true, launcher - no need)
+    const bool bIsAutoReloadEnabled = true;
+    if (bIsAutoReloadEnabled)
+    {
+        ChangeClip();
+    }
+}
+
+void USTUWeaponComponent::ChangeClip()
+{
+    if (!CanReload())
+    {
+        return;
+    }
+
+    CurrentWeapon->StopFire(); // my code
+    // CurrentWeapon->ChangeClip(); // my code, I'd rather change clip in callback after reload
+
+    bIsReloadInProgress = true;
+
+    PlayAnimMontage(CurrentReloadAnimMontage);
+}
+
 void USTUWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent)
 {
     if (!MeshComponent || GetOwnerSkeletalMesh() != MeshComponent)
@@ -240,5 +256,6 @@ void USTUWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent
     }
 
     bIsReloadInProgress = false;
-    // TODO CurrentWeapon change clip should be called
+
+    CurrentWeapon->ChangeClip(); // my code
 }

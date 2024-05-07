@@ -142,20 +142,20 @@ bool ASTUBaseWeapon::IsClipEmpty() const
 
 void ASTUBaseWeapon::DecreaseAmmo()
 {
-    check(CurrentAmmo.Bullets != 0);
+    if (CurrentAmmo.Bullets == 0)
+    {
+        UE_LOG(STUBaseWeaponLog, Warning, TEXT("Clip is empty. Impossible to decrease bullets!!"));
+        return;
+    }
 
     CurrentAmmo.Bullets--;
 
     LogAmmo();
 
-    // TODO expose to manual reloading feature
-    const bool bIsAutoReloadEnabled = true;
-    if (bIsAutoReloadEnabled)
+    if (IsClipEmpty() /* && !IsAmmoEmpty()*/) // my code
     {
-        if (IsClipEmpty() && !IsAmmoEmpty())
-        {
-            ChangeClip();
-        }
+        StopFire(); // I am not sure about this change, but let it be
+        OnClipEmpty.Broadcast();
     }
 }
 
@@ -166,11 +166,22 @@ void ASTUBaseWeapon::ChangeClip()
 
     if (!CurrentAmmo.bIsInfinite)
     {
+        if (CurrentAmmo.Clips == 0)
+        {
+            UE_LOG(STUBaseWeaponLog, Warning, TEXT("Ammo is empty. Impossible to change clip!!"));
+            return;
+        }
         CurrentAmmo.Clips--;
     }
     CurrentAmmo.Bullets = DefaultAmmo.Bullets;
 
     LogAmmo();
+}
+
+bool ASTUBaseWeapon::CanReload() const
+{
+    return CurrentAmmo.Bullets < DefaultAmmo.Bullets &&
+           !IsAmmoEmpty(); // my code, in course clips > 0 is checked, but invalid for infinite set in true
 }
 
 void ASTUBaseWeapon::LogAmmo()

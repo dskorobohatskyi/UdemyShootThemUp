@@ -80,6 +80,9 @@ private:
     void InitAnimations();
     void OnEquipFinished(USkeletalMeshComponent* MeshComponent);
     void OnReloadFinished(USkeletalMeshComponent* MeshComponent);
+    
+    void OnClipEmptyHandle();
+    void ChangeClip();
 
     void PlayAnimMontage(UAnimMontage* Animation);
 

@@ -23,6 +23,8 @@ struct FAmmoData
     bool bIsInfinite;
 };
 
+DECLARE_MULTICAST_DELEGATE(FOnClipEmptyDelegate);
+
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
 {
@@ -34,6 +36,12 @@ public:
 
     virtual void StartFire();
     virtual void StopFire();
+
+    void ChangeClip();
+    bool CanReload() const;
+
+public:
+    FOnClipEmptyDelegate OnClipEmpty;
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -68,7 +76,7 @@ protected:
     bool IsAmmoEmpty() const;
     bool IsClipEmpty() const;
     void DecreaseAmmo();
-    void ChangeClip();
+
     void LogAmmo();
 
 private:

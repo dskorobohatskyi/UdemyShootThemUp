@@ -6,13 +6,12 @@
 
 void ASTURifleWeapon::StartFire()
 {
-    MakeShot();
-
     if (GetWorld())
     {
         GetWorldTimerManager().SetTimer(ShootTimerHandle, this, &ASTURifleWeapon::MakeShot, IntervalBetweenShots,
                                         true); // IntervalBetweenShots will be used as delay
     }
+    MakeShot();
 }
 
 void ASTURifleWeapon::StopFire()
