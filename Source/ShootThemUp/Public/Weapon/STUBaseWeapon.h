@@ -24,7 +24,8 @@ public:
     void ChangeClip();
     bool CanReload() const;
 
-    FWeaponUIData GetUIData() const { return UIData; }
+    FWeaponUIData GetCurrentUIData() const { return UIData; }
+    FAmmoData GetCurrentAmmoData() const { return CurrentAmmo; }
 
 public:
     FOnClipEmptyDelegate OnClipEmpty;

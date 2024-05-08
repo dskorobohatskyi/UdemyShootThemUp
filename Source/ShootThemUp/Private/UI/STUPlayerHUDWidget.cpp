@@ -4,6 +4,10 @@
 #include "Player/Components/STUHealthComponent.h"
 #include "Player/Components/STUWeaponComponent.h"
 
+
+static const FString InvalidValueString(FString(TEXT("-")));
+
+
 float USTUPlayerHUDWidget::GetHealthPercent() const
 {
     APawn* OwningPlayer = GetOwningPlayerPawn();
@@ -21,19 +25,57 @@ float USTUPlayerHUDWidget::GetHealthPercent() const
     return HealthComponent->GetHealthPercent();
 }
 
-bool USTUPlayerHUDWidget::GetWeaponUIData(FWeaponUIData& UIData) const
+bool USTUPlayerHUDWidget::GetCurrentWeaponUIData(FWeaponUIData& UIData) const
 {
-    APawn* OwningPlayer = GetOwningPlayerPawn();
-    if (!OwningPlayer)
-    {
-        return false;
-    }
-
-    auto WeaponComponent = OwningPlayer->GetComponentByClass<USTUWeaponComponent>();
+    const auto WeaponComponent = GetWeaponComponent();
     if (!WeaponComponent)
     {
         return false;
     }
 
-    return WeaponComponent->GetWeaponUIData(UIData);
+    return WeaponComponent->GetCurrentWeaponUIData(UIData);
+}
+
+FString USTUPlayerHUDWidget::GetWeaponBulletsAsText() const
+{
+    FAmmoData CurrentAmmo;
+    const bool bSuccess = GetCurrentAmmoData(CurrentAmmo);
+    return bSuccess ? FString::FromInt(CurrentAmmo.Bullets) : InvalidValueString;
+}
+
+FString USTUPlayerHUDWidget::GetWeaponClipsAsText() const
+{
+    FAmmoData CurrentAmmo;
+    const bool bSuccess = GetCurrentAmmoData(CurrentAmmo);
+    const FString ClipsText = CurrentAmmo.bIsInfinite ? FString(TEXT("\u221e")) : FString::FromInt(CurrentAmmo.Clips);
+    return bSuccess ? ClipsText : InvalidValueString;
+}
+
+bool USTUPlayerHUDWidget::HasInfiniteClips() const
+{
+    FAmmoData CurrentAmmo;
+    const bool bSuccess = GetCurrentAmmoData(CurrentAmmo);
+    return bSuccess ? CurrentAmmo.bIsInfinite : false;
+}
+
+bool USTUPlayerHUDWidget::GetCurrentAmmoData(FAmmoData& AmmoData) const
+{
+    const auto WeaponComponent = GetWeaponComponent();
+    if (!WeaponComponent)
+    {
+        return false;
+    }
+
+    return WeaponComponent->GetCurrentAmmoData(AmmoData);
+}
+
+USTUWeaponComponent* USTUPlayerHUDWidget::GetWeaponComponent() const
+{
+    APawn* OwningPlayer = GetOwningPlayerPawn();
+    if (!OwningPlayer)
+    {
+        return nullptr;
+    }
+
+    return OwningPlayer->GetComponentByClass<USTUWeaponComponent>();
 }

@@ -8,6 +8,7 @@
 #include "STUCoreTypes.h"
 #include "STUPlayerHUDWidget.generated.h"
 
+class USTUWeaponComponent;
 /**
  *
  */
@@ -21,5 +22,20 @@ public:
     float GetHealthPercent() const;
 
     UFUNCTION(BlueprintCallable, Category = "UI")
-    bool GetWeaponUIData(FWeaponUIData& UIData) const;
+    bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
+
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    FString GetWeaponBulletsAsText() const;
+
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    FString GetWeaponClipsAsText() const;
+
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    bool HasInfiniteClips() const;
+
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    bool GetCurrentAmmoData(FAmmoData& AmmoData) const;
+
+private:
+    USTUWeaponComponent* GetWeaponComponent() const;
 };
