@@ -4,22 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "STUCoreTypes.h"
 #include "STUWeaponComponent.generated.h"
 
 class ASTUBaseWeapon;
 class UAnimMontage;
 
-USTRUCT(Blueprintable)
-struct FWeaponData
-{
-    GENERATED_USTRUCT_BODY()
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    TSubclassOf<ASTUBaseWeapon> WeaponClass;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    UAnimMontage* ReloadAnimMontage;
-};
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
@@ -85,25 +76,6 @@ private:
     void ChangeClip();
 
     void PlayAnimMontage(UAnimMontage* Animation);
-
-    template <typename T> T* FindNotifyByClassSafe(const UAnimSequenceBase* const Animation) const
-    {
-        if (!Animation)
-        {
-            return nullptr;
-        }
-
-        const auto MontageNotifies = Animation->Notifies;
-        for (auto& NotifyEvent : MontageNotifies)
-        {
-            auto Notify = Cast<T>(NotifyEvent.Notify.Get());
-            if (Notify)
-            {
-                return Notify;
-            }
-        }
-        return nullptr;
-    }
 
     // my code
     void PutWeaponToArmory(ASTUBaseWeapon* Weapon);

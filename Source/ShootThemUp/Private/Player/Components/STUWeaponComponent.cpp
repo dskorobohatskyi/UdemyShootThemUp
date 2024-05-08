@@ -7,6 +7,12 @@
 #include "Animations/STU_EquipFinishedAnimNotify.h"
 #include "Animations/STU_ReloadFinishedAnimNotify.h"
 
+#include "Animations/AnimUtils.h"
+
+DEFINE_LOG_CATEGORY_STATIC(STUWeaponComponentLog, Display, All);
+
+constexpr static int32 WeaponNum = 2;
+
 // Sets default values for this component's properties
 USTUWeaponComponent::USTUWeaponComponent()
 {
@@ -38,6 +44,8 @@ void USTUWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    checkf(WeaponDatas.Num() == WeaponNum, TEXT("Our character can hold only %i weapons"), WeaponNum);
+
     SpawnWeapons();
 
     InitAnimations();
@@ -62,8 +70,6 @@ void USTUWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void USTUWeaponComponent::SpawnWeapons()
 {
-    check(WeaponDatas.Num() != 0);
-
     ACharacter* Owner = Cast<ACharacter>(GetOwner());
 
     if (!GetWorld() || !Owner)
@@ -185,18 +191,29 @@ USkeletalMeshComponent* USTUWeaponComponent::GetOwnerSkeletalMesh() const
 
 void USTUWeaponComponent::InitAnimations()
 {
-    auto EquipFinishedNotify = FindNotifyByClassSafe<USTU_EquipFinishedAnimNotify>(EquipAnimMontage);
+    auto EquipFinishedNotify = AnimUtils::FindNotifyByClassSafe<USTU_EquipFinishedAnimNotify>(EquipAnimMontage);
     if (EquipFinishedNotify)
     {
         EquipFinishedNotify->OnNotifyTriggered.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
     }
+    else
+    {
+        UE_LOG(STUWeaponComponentLog, Error, TEXT("Equip anim notify is forgotten to set"));
+        checkNoEntry();
+    }
 
     for (const auto& WeaponData : WeaponDatas)
     {
-        auto ReloadFinishedNotify = FindNotifyByClassSafe<USTU_ReloadFinishedAnimNotify>(WeaponData.ReloadAnimMontage);
+        auto ReloadFinishedNotify =
+            AnimUtils::FindNotifyByClassSafe<USTU_ReloadFinishedAnimNotify>(WeaponData.ReloadAnimMontage);
         if (ReloadFinishedNotify)
         {
             ReloadFinishedNotify->OnNotifyTriggered.AddUObject(this, &USTUWeaponComponent::OnReloadFinished);
+        }
+        else
+        {
+            UE_LOG(STUWeaponComponentLog, Error, TEXT("Reload anim notify is forgotten to set"));
+            checkNoEntry();
         }
     }
 }

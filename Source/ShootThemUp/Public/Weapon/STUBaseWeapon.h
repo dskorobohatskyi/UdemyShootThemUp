@@ -4,26 +4,11 @@
 
 #include "GameFramework/Actor.h"
 #include "Engine/TimerHandle.h"
+#include "STUCoreTypes.h"
 #include "STUBaseWeapon.generated.h"
 
 class USkeletalMeshComponent;
 
-USTRUCT(Blueprintable)
-struct FAmmoData
-{
-    GENERATED_USTRUCT_BODY()
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    int32 Bullets;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "!bIsInfinite"), Category = "Weapon")
-    int32 Clips;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    bool bIsInfinite;
-};
-
-DECLARE_MULTICAST_DELEGATE(FOnClipEmptyDelegate);
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
