@@ -8,8 +8,6 @@
 #include "STUCoreTypes.h"
 #include "STUPlayerHUDWidget.generated.h"
 
-class USTUWeaponComponent;
-class USTUHealthComponent;
 /**
  *
  */
@@ -44,7 +42,4 @@ public:
     UFUNCTION(BlueprintCallable, Category = "UI")
     bool HasInfiniteClips() const;
     // my code end
-private:
-    USTUWeaponComponent* GetWeaponComponent() const;
-    USTUHealthComponent* GetHealthComponent() const;
 };

@@ -152,8 +152,6 @@ void ASTUBaseWeapon::DecreaseAmmo()
 
     CurrentAmmo.Bullets--;
 
-    LogAmmo();
-
     if (IsClipEmpty() /* && !IsAmmoEmpty()*/) // my code
     {
         StopFire(); // I am not sure about this change, but let it be
@@ -164,7 +162,6 @@ void ASTUBaseWeapon::DecreaseAmmo()
 void ASTUBaseWeapon::ChangeClip()
 {
     check(CurrentAmmo.Clips != 0 || CurrentAmmo.bIsInfinite);
-    UE_LOG(STUBaseWeaponLog, Display, TEXT("Ammo: changing"));
 
     if (!CurrentAmmo.bIsInfinite)
     {
@@ -176,8 +173,6 @@ void ASTUBaseWeapon::ChangeClip()
         CurrentAmmo.Clips--;
     }
     CurrentAmmo.Bullets = DefaultAmmo.Bullets;
-
-    LogAmmo();
 }
 
 bool ASTUBaseWeapon::CanReload() const
