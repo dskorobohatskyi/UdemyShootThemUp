@@ -164,6 +164,16 @@ void USTUWeaponComponent::Reload()
     ChangeClip();
 }
 
+bool USTUWeaponComponent::GetWeaponUIData(FWeaponUIData& UIData) const
+{
+    if (CurrentWeapon)
+    {
+        UIData = CurrentWeapon->GetUIData();
+        return true;
+    }
+    return false;
+}
+
 bool USTUWeaponComponent::CanFire() const
 {
     return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress;

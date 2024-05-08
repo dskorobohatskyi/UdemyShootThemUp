@@ -27,6 +27,9 @@ public:
     void SwitchToNextWeapon();
     void Reload();
 
+    bool GetWeaponUIData(FWeaponUIData& UIData) const;
+
+    // my code, I decided to expose these checks to public
     bool CanFire() const;
     bool CanEquip() const;
     bool CanReload() const;
