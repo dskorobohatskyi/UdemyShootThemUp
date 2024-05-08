@@ -6,6 +6,8 @@
 #include "GameFramework/HUD.h"
 #include "STUGameHUD.generated.h"
 
+class UUserWidget;
+
 /**
  *
  */
@@ -16,4 +18,10 @@ class SHOOTTHEMUP_API ASTUGameHUD : public AHUD
 
 public:
     virtual void DrawHUD() override;
+
+    virtual void BeginPlay() override;
+
+protected:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
 };

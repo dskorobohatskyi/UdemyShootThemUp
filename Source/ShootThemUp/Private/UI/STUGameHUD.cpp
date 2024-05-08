@@ -3,6 +3,10 @@
 #include "UI/STUGameHUD.h"
 #include "Engine/Canvas.h"
 
+#include "Blueprint/UserWidget.h"
+
+#include "UI/STUPlayerHUDWidget.h"
+
 void ASTUGameHUD::DrawHUD()
 {
 
@@ -18,4 +22,15 @@ void ASTUGameHUD::DrawHUD()
              Thickness);
     DrawLine(ScreenCenter.X, ScreenCenter.Y - HalfAimSize, ScreenCenter.X, ScreenCenter.Y + HalfAimSize, LineColor,
              Thickness);
+}
+
+void ASTUGameHUD::BeginPlay()
+{
+    Super::BeginPlay();
+
+    auto PlayerWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass.Get());
+    if (PlayerWidget)
+    {
+        PlayerWidget->AddToViewport();
+    }
 }
