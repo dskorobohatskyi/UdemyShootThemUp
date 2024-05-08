@@ -9,6 +9,7 @@
 #include "STUPlayerHUDWidget.generated.h"
 
 class USTUWeaponComponent;
+class USTUHealthComponent;
 /**
  *
  */
@@ -25,6 +26,16 @@ public:
     bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
 
     UFUNCTION(BlueprintCallable, Category = "UI")
+    bool GetCurrentAmmoData(FAmmoData& AmmoData) const;
+
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    bool IsPlayerAlive() const;
+
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    bool IsPlayerSpectating() const;
+
+    // my code start
+    UFUNCTION(BlueprintCallable, Category = "UI")
     FString GetWeaponBulletsAsText() const;
 
     UFUNCTION(BlueprintCallable, Category = "UI")
@@ -32,10 +43,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "UI")
     bool HasInfiniteClips() const;
-
-    UFUNCTION(BlueprintCallable, Category = "UI")
-    bool GetCurrentAmmoData(FAmmoData& AmmoData) const;
-
+    // my code end
 private:
     USTUWeaponComponent* GetWeaponComponent() const;
+    USTUHealthComponent* GetHealthComponent() const;
 };

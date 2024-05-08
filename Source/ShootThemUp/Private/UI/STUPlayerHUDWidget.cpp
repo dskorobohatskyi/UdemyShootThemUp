@@ -10,13 +10,7 @@ static const FString InvalidValueString(FString(TEXT("-")));
 
 float USTUPlayerHUDWidget::GetHealthPercent() const
 {
-    APawn* OwningPlayer = GetOwningPlayerPawn();
-    if (!OwningPlayer)
-    {
-        return 0.0f;
-    }
-
-    auto HealthComponent = OwningPlayer->GetComponentByClass<USTUHealthComponent>();
+    const auto HealthComponent = GetHealthComponent();
     if (!HealthComponent)
     {
         return 0.0f;
@@ -69,6 +63,18 @@ bool USTUPlayerHUDWidget::GetCurrentAmmoData(FAmmoData& AmmoData) const
     return WeaponComponent->GetCurrentAmmoData(AmmoData);
 }
 
+bool USTUPlayerHUDWidget::IsPlayerAlive() const
+{
+    const auto HealthComponent = GetHealthComponent();
+    return HealthComponent && !HealthComponent->IsDead();
+}
+
+bool USTUPlayerHUDWidget::IsPlayerSpectating() const
+{
+    const auto Controller = GetOwningPlayer();
+    return Controller && Controller->GetStateName() == NAME_Spectating;
+}
+
 USTUWeaponComponent* USTUPlayerHUDWidget::GetWeaponComponent() const
 {
     APawn* OwningPlayer = GetOwningPlayerPawn();
@@ -78,4 +84,15 @@ USTUWeaponComponent* USTUPlayerHUDWidget::GetWeaponComponent() const
     }
 
     return OwningPlayer->GetComponentByClass<USTUWeaponComponent>();
+}
+
+USTUHealthComponent* USTUPlayerHUDWidget::GetHealthComponent() const
+{
+    APawn* OwningPlayer = GetOwningPlayerPawn();
+    if (!OwningPlayer)
+    {
+        return nullptr;
+    }
+
+    return OwningPlayer->GetComponentByClass<USTUHealthComponent>();
 }
