@@ -3,6 +3,8 @@
 #include "Pickups/STUBasePickup.h"
 #include "Components/SphereComponent.h"
 
+#include "TimerManager.h"
+
 DEFINE_LOG_CATEGORY_STATIC(LogBasePickup, All, All);
 
 // Sets default values
@@ -18,23 +20,54 @@ ASTUBasePickup::ASTUBasePickup()
     SetRootComponent(CollisionComponent);
 }
 
+bool ASTUBasePickup::OnPickupGivenToPawn(APawn* PawnActor)
+{
+    return false;
+}
+
 // Called when the game starts or when spawned
 void ASTUBasePickup::BeginPlay()
 {
     Super::BeginPlay();
+
+    check(CollisionComponent);
 }
 
 void ASTUBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
 {
     Super::NotifyActorBeginOverlap(OtherActor);
 
-    UE_LOG(LogBasePickup, Display, TEXT("Pickup was taken"));
-
-    Destroy();
+    auto Pawn = Cast<APawn>(OtherActor);
+    if (OnPickupGivenToPawn(Pawn))
+    {
+        OnPickupTaken();
+    }
 }
 
 // Called every frame
 void ASTUBasePickup::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+}
+
+void ASTUBasePickup::OnPickupTaken()
+{
+    CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+    if (GetRootComponent())
+    {
+        GetRootComponent()->SetVisibility(false, true);
+    }
+
+    FTimerHandle RespawnTimerHandle;
+    GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASTUBasePickup::Respawn, RespawnTime, false);
+}
+
+
+void ASTUBasePickup::Respawn()
+{
+    CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+    if (GetRootComponent())
+    {
+        GetRootComponent()->SetVisibility(true, true);
+    }
 }
