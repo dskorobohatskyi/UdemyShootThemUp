@@ -137,6 +137,11 @@ bool ASTUBaseWeapon::IsAmmoEmpty() const
     return !CurrentAmmo.bIsInfinite && CurrentAmmo.Clips == 0 && IsClipEmpty();
 }
 
+bool ASTUBaseWeapon::IsAmmoFull() const
+{
+    return CurrentAmmo.Clips == DefaultAmmo.Clips && CurrentAmmo.Bullets == DefaultAmmo.Bullets;
+}
+
 bool ASTUBaseWeapon::IsClipEmpty() const
 {
     return CurrentAmmo.Bullets == 0;
@@ -155,7 +160,7 @@ void ASTUBaseWeapon::DecreaseAmmo()
     if (IsClipEmpty() /* && !IsAmmoEmpty()*/) // my code
     {
         StopFire(); // I am not sure about this change, but let it be
-        OnClipEmpty.Broadcast();
+        OnClipEmpty.Broadcast(this);
     }
 }
 
@@ -179,6 +184,50 @@ bool ASTUBaseWeapon::CanReload() const
 {
     return CurrentAmmo.Bullets < DefaultAmmo.Bullets &&
            !IsAmmoEmpty(); // my code, in course clips > 0 is checked, but invalid for infinite set in true
+}
+
+bool ASTUBaseWeapon::TryToAddAmmo(int32 ClipsAmount)
+{
+    checkf(ClipsAmount >= 0, TEXT("Invalid Clips Amount value passed to ASTUBaseWeapon::TryToAddAmmo"));
+
+    // Ignoring bullets in current implementation
+    if (CurrentAmmo.bIsInfinite || IsAmmoFull() || ClipsAmount <= 0)
+    {
+        return false;
+    }
+
+    if (IsAmmoEmpty())
+    {
+        check(CurrentAmmo.Clips == 0);
+        UE_LOG(STUBaseWeaponLog, Verbose, TEXT("TryToAddAmmo: Ammo was empty."));
+        CurrentAmmo.Clips =
+            FMath::Clamp(ClipsAmount, 0, DefaultAmmo.Clips + 1); // one clip is going to be used at once for reload
+
+        OnClipEmpty.Broadcast(this);
+    }
+    else if (CurrentAmmo.Clips < DefaultAmmo.Clips)
+    {
+        const auto NextClipsAmount = CurrentAmmo.Clips + ClipsAmount;
+        if (DefaultAmmo.Clips - NextClipsAmount >= 0) // not exceed the max clips value
+        {
+            CurrentAmmo.Clips = NextClipsAmount;
+            UE_LOG(STUBaseWeaponLog, Verbose, TEXT("TryToAddAmmo: Clips added, now: %d"), CurrentAmmo.Clips);
+        }
+        else
+        {
+            // we can fill all ammo
+            CurrentAmmo.Clips = DefaultAmmo.Clips;
+            CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+            UE_LOG(STUBaseWeaponLog, Verbose, TEXT("TryToAddAmmo: Ammo is full now."));
+        }
+    }
+    else // (CurrentAmmo.Clips == DefaultAmmo.Clips)
+    {
+        CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+        UE_LOG(STUBaseWeaponLog, Verbose, TEXT("TryToAddAmmo: Bullets were added to reach full ammo."));
+    }
+
+    return true;
 }
 
 void ASTUBaseWeapon::LogAmmo()

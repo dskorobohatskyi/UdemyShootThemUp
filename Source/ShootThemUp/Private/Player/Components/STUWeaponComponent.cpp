@@ -185,6 +185,19 @@ bool USTUWeaponComponent::GetCurrentAmmoData(FAmmoData& AmmoData) const
     return false;
 }
 
+bool USTUWeaponComponent::TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipsAmount)
+{
+    for (const auto Weapon : Weapons)
+    {
+        if (Weapon && Weapon->IsA(WeaponType))
+        {
+            return Weapon->TryToAddAmmo(ClipsAmount);
+        }
+    }
+
+    return false;
+}
+
 bool USTUWeaponComponent::CanFire() const
 {
     return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress;
@@ -261,13 +274,32 @@ void USTUWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
     bIsEquipInProgress = false;
 }
 
-void USTUWeaponComponent::OnClipEmptyHandle()
+void USTUWeaponComponent::OnClipEmptyHandle(ASTUBaseWeapon* AmmoEmptyWeapon)
 {
-    // TODO probably should be virtual method of base weapon (rifle override true, launcher - no need)
-    const bool bIsAutoReloadEnabled = true;
-    if (bIsAutoReloadEnabled)
+    if (CurrentWeapon == AmmoEmptyWeapon)
     {
-        ChangeClip();
+        // TODO probably should be virtual method of base weapon (rifle override true, launcher - no need)
+        const bool bIsAutoReloadEnabled = true;
+        if (bIsAutoReloadEnabled)
+        {
+            ChangeClip(); // with animation
+        }
+    }
+    else
+    {
+        // Silent reload for now
+        // potential TODO
+        const bool bIsSilentReloadForInactiveWeapon = true;
+        if (bIsSilentReloadForInactiveWeapon)
+        {
+            for (const auto Weapon : Weapons)
+            {
+                if (Weapon == AmmoEmptyWeapon)
+                {
+                    Weapon->ChangeClip(); // directly to the weapon without animation
+                }
+            }
+        }
     }
 }
 

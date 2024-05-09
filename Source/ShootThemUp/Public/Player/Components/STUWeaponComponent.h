@@ -30,6 +30,8 @@ public:
     bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
     bool GetCurrentAmmoData(FAmmoData& AmmoData) const;
 
+    bool TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipsAmount);
+
     // my code, I decided to expose these checks to public
     bool CanFire() const;
     bool CanEquip() const;
@@ -76,7 +78,7 @@ private:
     void OnEquipFinished(USkeletalMeshComponent* MeshComponent);
     void OnReloadFinished(USkeletalMeshComponent* MeshComponent);
     
-    void OnClipEmptyHandle();
+    void OnClipEmptyHandle(ASTUBaseWeapon* AmmoEmptyWeapon);
     void ChangeClip();
 
     void PlayAnimMontage(UAnimMontage* Animation);

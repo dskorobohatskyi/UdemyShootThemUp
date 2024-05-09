@@ -27,6 +27,8 @@ public:
     FWeaponUIData GetCurrentUIData() const { return UIData; }
     FAmmoData GetCurrentAmmoData() const { return CurrentAmmo; }
 
+    bool TryToAddAmmo(int32 ClipsAmount);
+
 public:
     FOnClipEmptyDelegate OnClipEmpty;
 
@@ -64,6 +66,7 @@ protected:
 
     // Ammo related methods
     bool IsAmmoEmpty() const;
+    bool IsAmmoFull() const;
     bool IsClipEmpty() const;
     void DecreaseAmmo();
 
