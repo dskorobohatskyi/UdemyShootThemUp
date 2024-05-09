@@ -38,4 +38,8 @@ public:
 private:
     void OnPickupTaken();
     void Respawn();
+    void GenerateRotationYaw();
+
+    float RotationYaw = 0.f;
+
 };
