@@ -29,7 +29,18 @@ public:
     bool IsDead() const;
 
     UFUNCTION(BlueprintCallable, Category = "Health")
+    bool HasFullHP() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    bool TryToAddHP(float HPIncrease);
+
+    // my code start 
+    UFUNCTION(BlueprintCallable, Category = "Health")
     void Heal(float HPIncrease);
+
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    void HealToFull();
+    // my code end
 
 protected:
     // Called when the game starts

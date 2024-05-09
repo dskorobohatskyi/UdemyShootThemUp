@@ -16,6 +16,22 @@ bool USTUHealthComponent::IsDead() const
     return FMath::IsNearlyZero(GetHealth()) || FMath::IsNegativeOrNegativeZero(GetHealth());
 }
 
+bool USTUHealthComponent::HasFullHP() const
+{
+    return FMath::IsNearlyEqual(GetHealth(), MaxHealth);
+}
+
+bool USTUHealthComponent::TryToAddHP(float HPIncrease)
+{
+    if (IsDead() || HasFullHP())
+    {
+        return false;
+    }
+
+    Heal(HPIncrease);
+    return true;
+}
+
 // Called when the game starts
 void USTUHealthComponent::BeginPlay()
 {
@@ -83,7 +99,7 @@ void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, co
 
 void USTUHealthComponent::TryToHeal()
 {
-    if (FMath::IsNearlyEqual(GetHealth(), MaxHealth))
+    if (HasFullHP())
     {
         // No need to heal here
         StopAutoHealTimer();
@@ -96,6 +112,11 @@ void USTUHealthComponent::TryToHeal()
 void USTUHealthComponent::Heal(float HPIncrease)
 {
     UpdateHealthSafe(Health + HPIncrease);
+}
+
+void USTUHealthComponent::HealToFull()
+{
+    UpdateHealthSafe(MaxHealth);
 }
 
 void USTUHealthComponent::StartAutoHealTimer()
