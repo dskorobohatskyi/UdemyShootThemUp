@@ -1,6 +1,8 @@
 // Shoot Them Up Game. All Rights Reserved
 
 #include "Weapon/STUProjectile.h"
+#include "Weapon/Components/STUWeaponFXComponent.h"
+
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -21,6 +23,8 @@ ASTUProjectile::ASTUProjectile()
     MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComponent");
     MovementComponent->ProjectileGravityScale = 0.f;
     MovementComponent->InitialSpeed = 2000.f;
+
+    WeaponFXComponent = CreateDefaultSubobject<USTUWeaponFXComponent>("WeaponFXComponent");
 }
 
 void ASTUProjectile::SetMovementDirection(const FVector& InDirection)
@@ -35,6 +39,7 @@ void ASTUProjectile::BeginPlay()
     check(MovementComponent);
     check(!MovementComponent->Velocity.IsNearlyZero());
     check(!FMath::IsNearlyZero(MovementComponent->InitialSpeed));
+    check(WeaponFXComponent);
 
     MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
     CollisionComponent->IgnoreActorWhenMoving(GetOwner(), true);
@@ -65,6 +70,7 @@ void ASTUProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* 
                                         GetController(),            //
                                         bDoFullDamage);
 
+    WeaponFXComponent->PlayImpactFX(Hit);
     DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 2.f, 0, 3.f);
 
     Destroy();
