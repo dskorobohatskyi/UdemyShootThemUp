@@ -82,6 +82,7 @@ bool ASTUBaseWeapon::MakeHitSafeForOwner(const FVector& InTraceStart, const FVec
 
     FCollisionQueryParams CollisionQueryParams;
     CollisionQueryParams.AddIgnoredActor(GetOwner());
+    CollisionQueryParams.bReturnPhysicalMaterial = true;
     const bool _ = GetWorld()->LineTraceSingleByChannel(OutHitResult, InTraceStart, InTraceEnd,
                                                         ECollisionChannel::ECC_Visibility, CollisionQueryParams);
 
