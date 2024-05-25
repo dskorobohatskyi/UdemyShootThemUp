@@ -52,6 +52,12 @@ void ASTUBaseCharacter::BeginPlay()
     check(HealthTextComponent);
     check(GetCharacterMovement());
     check(WeaponComponent);
+    check(GetMesh());
+    if (!bIsRagdollDeathEnabled)
+    {
+        check(DeathAnimMontage);
+    }
+
 
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnCharacterDeath);
     HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
@@ -147,8 +153,15 @@ void ASTUBaseCharacter::OnCharacterDeath()
 
     GetCharacterMovement()->DisableMovement();
 
-    check(DeathAnimMontage);
-    PlayAnimMontage(DeathAnimMontage);
+    if (!bIsRagdollDeathEnabled)
+    {
+        PlayAnimMontage(DeathAnimMontage);
+    }
+    else
+    {
+        GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        GetMesh()->SetSimulatePhysics(true);
+    }
 
     SetLifeSpan(LifeSpanOnDeath);
 

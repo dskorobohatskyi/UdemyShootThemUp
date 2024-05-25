@@ -68,6 +68,9 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
     USTUWeaponComponent* WeaponComponent;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
+    bool bIsRagdollDeathEnabled = false;
+
 private:
     void MoveForward(float AxisValue);
     void MoveRight(float AxisValue);
