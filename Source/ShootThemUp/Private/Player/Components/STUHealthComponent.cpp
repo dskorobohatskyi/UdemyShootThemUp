@@ -1,8 +1,15 @@
 // Shoot Them Up Game. All Rights Reserved
 
 #include "Player/Components/STUHealthComponent.h"
+
+#include "GameFramework/Actor.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/Pawn.h"
+
 #include "TimerManager.h"
 #include "Engine/World.h"
+
+#include "Camera/CameraShakeBase.h"
 
 DEFINE_LOG_CATEGORY_STATIC(STUHealthComponentLog, Display, All);
 
@@ -95,6 +102,8 @@ void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, co
             StartAutoHealTimer();
         }
     }
+
+    PlayCameraShake();
 }
 
 void USTUHealthComponent::TryToHeal()
@@ -141,4 +150,26 @@ void USTUHealthComponent::UpdateHealthSafe(float NewHealth)
 {
     Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
     OnHealthChanged.Broadcast(Health);
+}
+
+void USTUHealthComponent::PlayCameraShake()
+{
+    if (IsDead())
+    {
+        return;
+    }
+
+    const auto Player = Cast<APawn>(GetOwner());
+    if (!Player)
+    {
+        return;
+    }
+
+    const auto Controller = Player->GetController<APlayerController>();
+    if (!Controller || !Controller->PlayerCameraManager)
+    {
+        return;
+    }
+
+    Controller->PlayerCameraManager->StartCameraShake(CameraShake);
 }
