@@ -42,4 +42,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "UI")
     bool HasInfiniteClips() const;
     // my code end
+
+    virtual bool Initialize() override;
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+    void OnTakeDamage();
+
+private:
+    void OnHealthChanged(float Health, float Delta);
 };

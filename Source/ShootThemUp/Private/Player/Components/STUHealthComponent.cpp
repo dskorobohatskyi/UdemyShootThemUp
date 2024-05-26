@@ -148,8 +148,12 @@ void USTUHealthComponent::StopAutoHealTimer()
 
 void USTUHealthComponent::UpdateHealthSafe(float NewHealth)
 {
-    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
-    OnHealthChanged.Broadcast(Health);
+    const float UpdatedHealth = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    const float HealthDelta = UpdatedHealth - GetHealth();
+    Health = UpdatedHealth;
+
+    // Negative delta indicates recieved damage.
+    OnHealthChanged.Broadcast(Health, HealthDelta);
 }
 
 void USTUHealthComponent::PlayCameraShake()

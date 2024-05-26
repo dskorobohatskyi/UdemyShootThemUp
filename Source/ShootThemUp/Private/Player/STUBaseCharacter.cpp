@@ -63,7 +63,7 @@ void ASTUBaseCharacter::BeginPlay()
     HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
 
     // Initial value setting since Actor components BeginPlay() are called at first, and then Actor itself
-    OnHealthChanged(HealthComponent->GetHealth());
+    OnHealthChanged(HealthComponent->GetHealth(), 0.f);
 
     LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
 }
@@ -174,7 +174,7 @@ void ASTUBaseCharacter::OnCharacterDeath()
     WeaponComponent->StopFire();
 }
 
-void ASTUBaseCharacter::OnHealthChanged(float NewHealth)
+void ASTUBaseCharacter::OnHealthChanged(float NewHealth, float Delta)
 {
     HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%0.f"), NewHealth)));
 }

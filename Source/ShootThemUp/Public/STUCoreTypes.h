@@ -49,7 +49,7 @@ struct FWeaponUIData
 // Health
 
 DECLARE_MULTICAST_DELEGATE(FOnDeathDelegate); // C++ only delegate, no exposing to BPs
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChangedDelegate, float);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedDelegate, float, float);
 
 // VFX
 

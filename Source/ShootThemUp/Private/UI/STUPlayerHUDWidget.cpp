@@ -53,6 +53,26 @@ bool USTUPlayerHUDWidget::HasInfiniteClips() const
     return bSuccess ? CurrentAmmo.bIsInfinite : false;
 }
 
+bool USTUPlayerHUDWidget::Initialize()
+{
+    auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(GetOwningPlayerPawn());
+    if (HealthComponent)
+    {
+        HealthComponent->OnHealthChanged.AddUObject(this, &USTUPlayerHUDWidget::OnHealthChanged);
+    }
+
+    return Super::Initialize();
+}
+
+void USTUPlayerHUDWidget::OnHealthChanged(float Health, float Delta)
+{
+    const bool HasReceivedDamage = Delta < 0.f;
+    if (HasReceivedDamage)
+    {
+        OnTakeDamage();
+    }
+}
+
 bool USTUPlayerHUDWidget::GetCurrentAmmoData(FAmmoData& AmmoData) const
 {
     const auto WeaponComponent = STUUtils::GetSTUPlayerComponent<USTUWeaponComponent>(GetOwningPlayerPawn());
