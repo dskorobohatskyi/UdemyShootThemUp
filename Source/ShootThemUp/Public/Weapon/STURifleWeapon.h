@@ -8,6 +8,7 @@
 
 class USTUWeaponFXComponent;
 class UNiagaraComponent;
+class UNiagaraSystem;
 
 /**
  *
@@ -33,6 +34,12 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shooting")
     float DamageAmount = 10.f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    UNiagaraSystem* TraceFX;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    FString TraceTargetName = TEXT("TraceTarget");
+
     UPROPERTY(VisibleAnywhere, Category = "VFX")
     USTUWeaponFXComponent* WeaponFXComponent;
 
@@ -56,4 +63,5 @@ private:
 
     void InitMuzzleFX();
     void SetMuzzleFXVisibility(bool bIsVisible);
+    void SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd);
 };

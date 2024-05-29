@@ -7,6 +7,7 @@
 #include "DrawDebugHelpers.h"
 #include "Engine/DamageEvents.h"
 #include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 #ifndef STU_RIFLE_DEBUG_DRAW
 #define STU_RIFLE_DEBUG_DRAW 0
@@ -75,10 +76,11 @@ void ASTURifleWeapon::MakeShot()
     }
 
     const FVector MuzzleLocation = GetMuzzleSocketLocation();
-
+    FVector TraceFXEnd = TraceEnd;
     // Important: IsPhysicallyPossibleShot is indicator of correct shooting even if bBlockingHit is true
     if (IsPhysicallyPossibleHitFromMuzzle(HitResult))
     {
+        TraceFXEnd = HitResult.ImpactPoint;
         MakeDamage(HitResult);
 
         WeaponFXComponent->PlayImpactFX(HitResult);
@@ -93,10 +95,8 @@ void ASTURifleWeapon::MakeShot()
         DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5.f, 24, FColor::Yellow, false, 4.f, 0, 3.f);
 #endif
     }
-    else
-    {
-        DrawDebugLine(GetWorld(), MuzzleLocation, HitResult.TraceEnd, FColor::Red, false, 3.f, 0, 3.f);
-    }
+    
+    SpawnTraceFX(MuzzleLocation, TraceFXEnd);
 
     DecreaseAmmo();
 }
@@ -142,6 +142,17 @@ void ASTURifleWeapon::SetMuzzleFXVisibility(bool bIsVisible)
     {
         MuzzleFXComponent->SetPaused(!bIsVisible);
         MuzzleFXComponent->SetVisibility(bIsVisible, true);
+    }
+}
+
+void ASTURifleWeapon::SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd) {
+    const auto TraceFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), //
+                                                                                 TraceFX,    //
+                                                                                 TraceStart);
+
+    if (TraceFXComponent)
+    {
+        TraceFXComponent->SetVariablePosition(FName(*TraceTargetName), TraceEnd);
     }
 }
 

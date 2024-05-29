@@ -6,7 +6,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "DrawDebugHelpers.h"
+//#include "DrawDebugHelpers.h"
 
 // Sets default values
 ASTUProjectile::ASTUProjectile()
@@ -72,7 +72,7 @@ void ASTUProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* 
                                         bDoFullDamage);
 
     WeaponFXComponent->PlayImpactFX(Hit);
-    DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 2.f, 0, 3.f);
+    //DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 2.f, 0, 3.f);
 
     Destroy();
 }
