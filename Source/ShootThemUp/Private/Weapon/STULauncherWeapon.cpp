@@ -46,4 +46,5 @@ void ASTULauncherWeapon::MakeShot()
     }
 
     DecreaseAmmo();
+    SpawnMuzzleFX(); // don't care about component, it will be managed(auto-destroyed automatically)
 }

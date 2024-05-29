@@ -6,8 +6,8 @@
 #include "Weapon/STUBaseWeapon.h"
 #include "STURifleWeapon.generated.h"
 
-
 class USTUWeaponFXComponent;
+class UNiagaraComponent;
 
 /**
  *
@@ -33,7 +33,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shooting")
     float DamageAmount = 10.f;
 
-
     UPROPERTY(VisibleAnywhere, Category = "VFX")
     USTUWeaponFXComponent* WeaponFXComponent;
 
@@ -44,11 +43,17 @@ protected:
     // GetTraceData impl is okay, but let's add weapon spread in ModifyShootDirectionForTrace
     virtual void ModifyShootDirectionForTrace(FVector& InOutShotDirection) override;
 
-
     virtual void BeginPlay() override;
 
 private:
     void AddSpreadForShooting(FVector& InOutShootDirection); // #initiative
 
     FTimerHandle ShootTimerHandle;
+
+    // VFX
+    UPROPERTY()
+    UNiagaraComponent* MuzzleFXComponent;
+
+    void InitMuzzleFX();
+    void SetMuzzleFXVisibility(bool bIsVisible);
 };

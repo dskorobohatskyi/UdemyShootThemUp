@@ -6,6 +6,7 @@
 #include "TimerManager.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/DamageEvents.h"
+#include "NiagaraComponent.h"
 
 #ifndef STU_RIFLE_DEBUG_DRAW
 #define STU_RIFLE_DEBUG_DRAW 0
@@ -25,11 +26,16 @@ void ASTURifleWeapon::BeginPlay()
 
 void ASTURifleWeapon::StartFire()
 {
-    if (GetWorld())
+    if (!GetWorld())
     {
-        GetWorldTimerManager().SetTimer(ShootTimerHandle, this, &ASTURifleWeapon::MakeShot, IntervalBetweenShots,
-                                        true); // IntervalBetweenShots will be used as delay
+        return;
     }
+
+    InitMuzzleFX();
+    GetWorldTimerManager().SetTimer(ShootTimerHandle,                 //
+                                    this, &ASTURifleWeapon::MakeShot, //
+                                    IntervalBetweenShots,             //
+                                    true);                            // IntervalBetweenShots will be used as delay
     MakeShot();
 }
 
@@ -39,6 +45,7 @@ void ASTURifleWeapon::StopFire()
     {
         GetWorldTimerManager().ClearTimer(ShootTimerHandle);
     }
+    SetMuzzleFXVisibility(false);
 }
 
 void ASTURifleWeapon::MakeShot()
@@ -117,6 +124,25 @@ void ASTURifleWeapon::ModifyShootDirectionForTrace(FVector& InOutShotDirection)
 void ASTURifleWeapon::AddSpreadForShooting(FVector& InOutShootDirection)
 {
     InOutShootDirection = FMath::VRandCone(InOutShootDirection, FMath::DegreesToRadians(WeaponSpreadAngleDegrees));
+}
+
+void ASTURifleWeapon::InitMuzzleFX()
+{
+    if (!MuzzleFXComponent)
+    {
+        MuzzleFXComponent = SpawnMuzzleFX();
+    }
+
+    SetMuzzleFXVisibility(true);
+}
+
+void ASTURifleWeapon::SetMuzzleFXVisibility(bool bIsVisible)
+{
+    if (MuzzleFXComponent)
+    {
+        MuzzleFXComponent->SetPaused(!bIsVisible);
+        MuzzleFXComponent->SetVisibility(bIsVisible, true);
+    }
 }
 
 #undef STU_RIFLE_DEBUG_DRAW

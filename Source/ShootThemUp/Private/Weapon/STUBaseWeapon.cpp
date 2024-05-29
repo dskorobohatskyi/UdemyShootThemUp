@@ -9,6 +9,9 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
 
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+
 DEFINE_LOG_CATEGORY_STATIC(STUBaseWeaponLog, Display, All);
 
 // Sets default values
@@ -237,4 +240,15 @@ void ASTUBaseWeapon::LogAmmo()
         FString::Printf(TEXT("Ammo: %d / %s"), CurrentAmmo.Bullets,
                         (CurrentAmmo.bIsInfinite ? *FString(TEXT("\u221e")) : *FString::FromInt(CurrentAmmo.Clips)));
     UE_LOG(STUBaseWeaponLog, Display, TEXT("%s"), *AmmoOutput);
+}
+
+UNiagaraComponent* ASTUBaseWeapon::SpawnMuzzleFX()
+{
+    return UNiagaraFunctionLibrary::SpawnSystemAttached(MuzzleFX,                      //
+                                                        WeaponMesh,                    //
+                                                        MuzzleSocketName,              //
+                                                        FVector::ZeroVector,           //
+                                                        FRotator::ZeroRotator,         //
+                                                        EAttachLocation::SnapToTarget, //
+                                                        true);
 }
