@@ -15,6 +15,8 @@ public class ShootThemUp : ModuleRules
             "InputCore",
             "Niagara",
             "PhysicsCore",
+            "GameplayTasks",
+            "NavigationSystem",
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });
