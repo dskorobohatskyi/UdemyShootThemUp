@@ -33,20 +33,30 @@ EBTNodeResult::Type UBTTNextLocationTask::ExecuteTask(UBehaviorTreeComponent& Ow
         return EBTNodeResult::Failed;
     }
 
-    FVector NewLocation = Pawn->GetActorLocation();
+    FVector Location = Pawn->GetActorLocation();
+    if (!SelfCenter)
+    {
+        auto CenterActor = Cast<AActor>(Blackboard->GetValueAsObject(CenterActorKey.SelectedKeyName));
+        if (!CenterActor)
+        {
+            return EBTNodeResult::Failed;
+        }
+        Location = CenterActor->GetActorLocation();
+    }
+
     FNavLocation NavLocation;
-    const bool Found = NavSys->GetRandomReachablePointInRadius(Pawn->GetActorLocation(), Radius, NavLocation);
+    const bool Found = NavSys->GetRandomReachablePointInRadius(Location, Radius, NavLocation);
 
     if (Found)
     {
-        NewLocation = NavLocation.Location;
+        Location = NavLocation.Location;
     }
     //else
     //{
     //    return EBTNodeResult::Failed;
     //}
 
-    Blackboard->SetValueAsVector(AimLocationKey.SelectedKeyName, NewLocation);
+    Blackboard->SetValueAsVector(AimLocationKey.SelectedKeyName, Location);
 
     return EBTNodeResult::Succeeded;
 }
