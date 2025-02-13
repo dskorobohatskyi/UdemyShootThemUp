@@ -4,7 +4,9 @@
 class STUUtils
 {
 public:
-    template<typename T> static T* GetSTUPlayerComponent(APawn* PlayerPawn)
+    template<typename T>
+    UE_DEPRECATED(5.4, "Use AActor::FindComponentByClass instead. No need to have this one")
+    static T* GetSTUPlayerComponent(APawn* PlayerPawn)
     {
         if (!PlayerPawn)
         {
