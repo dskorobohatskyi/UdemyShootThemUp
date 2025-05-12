@@ -60,13 +60,30 @@ APlayerController* ASTUBaseWeapon::GetPlayerController() const
 
 bool ASTUBaseWeapon::GetCameraViewPoint(FVector& OutViewLocation, FRotator& OutViewRotation) const
 {
-    APlayerController* Controller = GetPlayerController();
-    if (!Controller)
+    const auto STUCharacter = Cast<ACharacter>(GetOwner());
+    if (!STUCharacter)
     {
         return false;
     }
 
-    Controller->GetPlayerViewPoint(OutViewLocation, OutViewRotation);
+    if (STUCharacter->IsPlayerControlled())
+    {
+        APlayerController* Controller = GetPlayerController();
+        if (!Controller)
+        {
+            return false;
+        }
+
+        Controller->GetPlayerViewPoint(OutViewLocation, OutViewRotation);
+    }
+    else
+    {
+        // controlled by AI
+        OutViewLocation = GetMuzzleSocketLocation();
+        OutViewRotation = WeaponMesh->GetSocketRotation(MuzzleSocketName);
+    }
+
+
     return true;
 }
 
