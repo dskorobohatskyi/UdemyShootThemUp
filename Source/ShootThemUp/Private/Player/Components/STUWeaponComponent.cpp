@@ -106,6 +106,7 @@ void USTUWeaponComponent::AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneCom
 void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex, bool bIsAnimating)
 {
     check(WeaponIndex >= 0 && WeaponIndex < Weapons.Num());
+    CurrentWeaponIndex = WeaponIndex; // make sure it works everywhere [my change]
 
     auto OwnerMesh = GetOwnerSkeletalMesh();
     if (!OwnerMesh)
@@ -130,8 +131,8 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex, bool bIsAnimating)
 
     // code below can fail if some sort logic is present
     // CurrentReloadAnimMontage = WeaponDatas[CurrentWeaponIndex].ReloadAnimMontage;
-    const auto CurrentWeaponData = WeaponDatas.FindByPredicate([this](const FWeaponData& Data) { //
-        return CurrentWeapon->GetClass() == Data.WeaponClass;                                    //
+    const auto CurrentWeaponData = WeaponDatas.FindByPredicate([this](const FWeaponData& Data) {
+        return CurrentWeapon->GetClass() == Data.WeaponClass;
     });
     CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
 }

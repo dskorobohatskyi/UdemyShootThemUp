@@ -29,7 +29,10 @@ public:
     FWeaponUIData GetCurrentUIData() const { return UIData; }
     FAmmoData GetCurrentAmmoData() const { return CurrentAmmo; }
 
+    // Ammo related methods
     bool TryToAddAmmo(int32 ClipsAmount);
+    bool IsAmmoEmpty() const;
+    bool IsAmmoFull() const;
 
 public:
     FOnClipEmptyDelegate OnClipEmpty;
@@ -70,8 +73,6 @@ protected:
     virtual bool IsPhysicallyPossibleHitFromMuzzle(const FHitResult& InHitResult) const;
 
     // Ammo related methods
-    bool IsAmmoEmpty() const;
-    bool IsAmmoFull() const;
     bool IsClipEmpty() const;
     void DecreaseAmmo();
 
