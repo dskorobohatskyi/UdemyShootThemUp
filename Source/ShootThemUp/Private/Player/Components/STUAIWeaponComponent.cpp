@@ -4,8 +4,6 @@
 #include "Player/Components/STUAIWeaponComponent.h"
 #include "Weapon/STUBaseWeapon.h"
 
-UE_DISABLE_OPTIMIZATION_SHIP
-
 void USTUAIWeaponComponent::StartFire()
 {
     // TODO, i'd also add the check about the player being alive
@@ -20,7 +18,7 @@ void USTUAIWeaponComponent::StartFire()
     }
     else
     {
-        Super::StartFire(); // based from course, CurrentWeapon->StartFire() is called, but I like the idea to reuse parent one
+        CurrentWeapon->StartFire(); // based from course, CurrentWeapon->StartFire() is called, but I like the idea to reuse parent one
     }
 }
 
@@ -45,8 +43,9 @@ void USTUAIWeaponComponent::SwitchToNextWeapon()
 
     if (NextIndex != CurrentWeaponIndex)
     {
+        CurrentWeapon->StopFire(); // my code
         EquipWeapon(NextIndex);
-        UE_LOG(LogTemp, Warning, TEXT("Switched weapon to %d index"), CurrentWeaponIndex);
+        UE_LOG(LogTemp, Verbose, TEXT("Switched weapon to %d index"), CurrentWeaponIndex);
     }
 
 }

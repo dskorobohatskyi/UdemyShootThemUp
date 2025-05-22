@@ -160,6 +160,19 @@ void USTUWeaponComponent::SwitchToNextWeapon()
     EquipWeapon(CurrentWeaponIndex);
 }
 
+void USTUWeaponComponent::RequestWeaponSwitch()
+{
+    if (!CanEquip())
+    {
+        bHasRequestedWeaponChange = true;
+    }
+    else
+    {
+        SwitchToNextWeapon(); // TODO I'd like to change it to have a choice over weapons
+    }
+}
+
+
 void USTUWeaponComponent::Reload()
 {
     ChangeClip();
@@ -201,17 +214,20 @@ bool USTUWeaponComponent::TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, i
 
 bool USTUWeaponComponent::CanFire() const
 {
-    return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress;
+    return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress && !bHasRequestedWeaponChange;
 }
 
 bool USTUWeaponComponent::CanEquip() const
 {
+    // NOTE: if you decide to modify this method make sure that 
+    // bHasRequestedWeaponChange is checked properly and your new case is processed
     return !bIsEquipInProgress && !bIsReloadInProgress;
 }
 
 bool USTUWeaponComponent::CanReload() const
 {
-    return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress && CurrentWeapon->CanReload();
+    return CurrentWeapon && !bIsEquipInProgress && !bIsReloadInProgress && !bHasRequestedWeaponChange &&
+           CurrentWeapon->CanReload();
 }
 
 USkeletalMeshComponent* USTUWeaponComponent::GetOwnerSkeletalMesh() const
@@ -272,6 +288,16 @@ void USTUWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
         return;
     }
 
+    // my code start
+    //weird case, but let it go
+    if (bHasRequestedWeaponChange)
+    {
+        bHasRequestedWeaponChange = false;
+        //SwitchToNextWeapon(); <<<<<< ignore requested change weapon, since we already done this. 
+        // TODO area to improvement if we request weapon change since we don't need all animation to be played, but need another weapon
+    }
+    // my code end
+
     bIsEquipInProgress = false;
 }
 
@@ -326,7 +352,17 @@ void USTUWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent
         return;
     }
 
+    // old weapon logic
     bIsReloadInProgress = false;
 
-    CurrentWeapon->ChangeClip(); // my code
+    // my code start
+    CurrentWeapon->ChangeClip(); // moved from ChangeClip to behave real
+    // attempt to switch weapon
+    // Note: bIsReloadInProgress must be called before SwitchToNextWeapon, since the method relies on CanEquip() method
+    if (bHasRequestedWeaponChange)
+    {
+        bHasRequestedWeaponChange = false;
+        SwitchToNextWeapon();
+    }
+    // my code end
 }

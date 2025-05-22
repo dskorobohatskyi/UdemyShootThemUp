@@ -25,6 +25,7 @@ public:
     void StopFire();
 
     virtual void SwitchToNextWeapon();
+    void RequestWeaponSwitch();
     void Reload();
 
     bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
@@ -70,7 +71,7 @@ private:
     UPROPERTY()
     UAnimMontage* CurrentReloadAnimMontage = nullptr;
 
-
+    bool bHasRequestedWeaponChange = false;
     bool bIsEquipInProgress = false;
     bool bIsReloadInProgress = false;
 

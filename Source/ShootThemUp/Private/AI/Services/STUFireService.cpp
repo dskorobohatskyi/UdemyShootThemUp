@@ -20,11 +20,12 @@ void USTUFireService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
     
     if (Controller)
     {
+        // TODO exit if character is dead
         const auto WeaponComp = Controller->GetPawn()->FindComponentByClass<USTUWeaponComponent>();
         if (WeaponComp)
         {
             // TODO fire starts now even if ai character is still rotating to player
-            bHasAim ? WeaponComp->StartFire() : WeaponComp->StopFire();
+            bHasAim && WeaponComp->CanFire() ? WeaponComp->StartFire() : WeaponComp->StopFire();
         }
     }
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
