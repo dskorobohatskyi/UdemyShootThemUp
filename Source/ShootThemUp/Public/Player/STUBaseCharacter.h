@@ -71,6 +71,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
     bool bIsRagdollDeathEnabled = false;
 
+protected:
+    virtual void OnCharacterDeath();
+
 private:
     void MoveForward(float AxisValue);
     void MoveRight(float AxisValue);
@@ -78,7 +81,6 @@ private:
     void OnRunningStart();
     void OnRunningEnd();
 
-    void OnCharacterDeath();
     void OnHealthChanged(float NewHealth, float Delta);
 
     UFUNCTION()
