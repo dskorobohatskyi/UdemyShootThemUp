@@ -199,6 +199,32 @@ bool USTUWeaponComponent::GetCurrentAmmoData(FAmmoData& AmmoData) const
     return false;
 }
 
+bool USTUWeaponComponent::IsSpecifiedAmmoEmpty(TSubclassOf<ASTUBaseWeapon> WeaponType) const
+{
+    for (const auto Weapon : Weapons)
+    {
+        if (Weapon && Weapon->IsA(WeaponType))
+        {
+            return Weapon->IsAmmoEmpty();
+        }
+    }
+
+    return false;
+}
+
+bool USTUWeaponComponent::IsSpecifiedAmmoFull(TSubclassOf<ASTUBaseWeapon> WeaponType) const
+{
+    for (const auto Weapon : Weapons)
+    {
+        if (Weapon && Weapon->IsA(WeaponType))
+        {
+            return Weapon->IsAmmoFull();
+        }
+    }
+
+    return false;
+}
+
 bool USTUWeaponComponent::TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipsAmount)
 {
     for (const auto Weapon : Weapons)

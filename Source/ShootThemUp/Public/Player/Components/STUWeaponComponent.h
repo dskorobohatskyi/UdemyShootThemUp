@@ -31,6 +31,9 @@ public:
     bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
     bool GetCurrentAmmoData(FAmmoData& AmmoData) const;
 
+    bool IsSpecifiedAmmoEmpty(TSubclassOf<ASTUBaseWeapon> WeaponType) const;
+    bool IsSpecifiedAmmoFull(TSubclassOf<ASTUBaseWeapon> WeaponType) const;
+
     bool TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipsAmount);
 
     // my code, I decided to expose these checks to public
