@@ -20,6 +20,11 @@ ASTUBasePickup::ASTUBasePickup()
     SetRootComponent(CollisionComponent);
 }
 
+bool ASTUBasePickup::CanBeTaken() const
+{
+    return GetWorldTimerManager().IsTimerActive(RespawnTimerHandle);
+}
+
 bool ASTUBasePickup::OnPickupGivenToPawn(APawn* PawnActor)
 {
     return false;
@@ -61,7 +66,6 @@ void ASTUBasePickup::OnPickupTaken()
         GetRootComponent()->SetVisibility(false, true);
     }
 
-    FTimerHandle RespawnTimerHandle;
     GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASTUBasePickup::Respawn, RespawnTime, false);
 }
 
@@ -74,6 +78,7 @@ void ASTUBasePickup::Respawn()
     {
         GetRootComponent()->SetVisibility(true, true);
     }
+    RespawnTimerHandle.Invalidate();
 }
 
 void ASTUBasePickup::GenerateRotationYaw() 

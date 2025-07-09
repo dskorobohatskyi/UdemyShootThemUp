@@ -18,6 +18,8 @@ public:
     // Sets default values for this actor's properties
     ASTUBasePickup();
 
+    bool CanBeTaken() const;
+
 protected:
     UPROPERTY(VisibleAnywhere, Category = "Pickup")
     USphereComponent* CollisionComponent;
@@ -42,4 +44,5 @@ private:
 
     float RotationYaw = 0.f;
 
+    FTimerHandle RespawnTimerHandle;
 };
